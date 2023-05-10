@@ -1,0 +1,1 @@
+export PYTHONPATH=$PYTHONPATH:/home/shaunniel/Documents/workspace-python/lanConnect/
