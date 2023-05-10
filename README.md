@@ -1,3 +1,6 @@
+### v5 (unclean version):
+- update share and view screen functionality in both instructor and student
+- view active instructors in admin dashboard
 ### v4:
 - Added additional functionalities for attendance in Instructor's end
 - Added printing of attendance

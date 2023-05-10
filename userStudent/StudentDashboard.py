@@ -13,6 +13,10 @@ from utils.db_connection import get_database
 
 import datetime
 
+import subprocess
+import os
+import signal
+
 class StudentDashboard(customtkinter.CTk):
     def __init__(self, id, first_name, last_name, appearance_mode, user_type):
         super().__init__()
@@ -126,6 +130,8 @@ class StudentDashboard(customtkinter.CTk):
         self.scaling_optionemenu.set("100%")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
+        self.receiver_process = None # Initialize sender_process as None
 
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
@@ -133,14 +139,28 @@ class StudentDashboard(customtkinter.CTk):
             self.destroy()
 
     def view_shared_screen_event(self):
-        from userStudent.components.ViewSharedScreen import ViewSharedScreenFrame
+        if self.receiver_process is not None:
+            subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
+            if hasattr(signal, 'CTRL_C_EVENT'):
+                os.kill(os.getpid(), signal.CTRL_C_EVENT)
+                subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
+                
+            else:
+                # unix.
+                pgid = os.getpgid(os.getpid())
+                subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
+                
+                if pgid == 1:
+                    subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
+                else:
+                    subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
 
-        self.sidebar_view_shared_screen.configure(state='disabled')
-
-        window = ViewSharedScreenFrame()
-        window.protocol("WM_DELETE_WINDOW",
-                        lambda: self.on_window_close(window))
-        window.mainloop()
+            self.receiver_process = None
+            self.sidebar_view_shared_screen.configure(fg_color="green", text="View Screen") # Change button text to "Share Screen"
+        else:
+            self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
+            self.sidebar_view_shared_screen.configure(fg_color="red", text="Stop View Screen") # Change button text to "Stop Share Screen"
+        
 
     def on_window_close(self, window):
         # Enable the button when the window is closed

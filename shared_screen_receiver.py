@@ -1,10 +1,8 @@
 # student [view instructor screen]
 
-# from vidstream import StreamingServer
-from shared_screen_module import StreamingServer
+from vidstream import StreamingServer
 import threading
-
-stop_server = False
+import socket
 
 
 def start_receiver(ip_address, port):
@@ -17,16 +15,6 @@ def start_receiver(ip_address, port):
     t = threading.Thread(target=receiver.start_server)
     t.start()
 
-    while not stop_server:
-        continue
-
-    # When You Are Done
-    receiver.stop_server()
-
-
-def stop_receiver():
-    global stop_server
-    stop_server = True
-
-
-start_receiver("192.168.1.12", 9995)
+hostname = socket.gethostname()
+ip_address = socket.gethostbyname(hostname)
+start_receiver(ip_address, 9995)

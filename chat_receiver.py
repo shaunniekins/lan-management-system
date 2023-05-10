@@ -6,7 +6,7 @@ import datetime
 
 hostname = socket.gethostname()
 HOST = socket.gethostbyname(hostname)
-PORT = 9997
+PORT = 9995
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((HOST, PORT))
@@ -18,22 +18,29 @@ def receive_messages():
         os.makedirs(LAN_FILES_DIR)
 
     while True:
-        FILE_MARKER = "<FILE>"
-
         msg = client_socket.recv(1024).decode()
+        
+        print("message: ", msg)
 
-        header = client_socket.recv(1024).decode()
-        if header.startswith("<FILE>"):
-            filename, file_size = header[len("<FILE>"):].split(":")
-            file_size = int(file_size)
-            file_path = os.path.join(LAN_FILES_DIR, filename)
+        if msg.startswith("<FILE>"):
+            # The message contains file data
+            filename_start = msg.find("<FILE>") + len("<FILE>")
+            filename_end = msg.find("<FILE>", filename_start)
+            filename = msg[filename_start:filename_end]
+
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            new_filename = f"{current_time}_{os.path.basename(filename)}"
+            file_contents = b""
+            while True:
+                data = client_socket.recv(1024)
+                if not data:
+                    break
+                file_contents += data
+                if data.endswith(b""):
+                    break
+            file_path = os.path.join(LAN_FILES_DIR, new_filename)
             with open(file_path, "wb") as f:
-                bytes_received = 0
-                while bytes_received < file_size:
-                    data = client_socket.recv(1024)
-                    f.write(data)
-                    bytes_received += len(data)
-
+                f.write(file_contents)
         else:
             print(msg)
 

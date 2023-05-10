@@ -19,7 +19,7 @@ class ChatScreen:
 
         hostname = socket.gethostname()
         self.HOST = socket.gethostbyname(hostname)
-        self.PORT = 9997
+        self.PORT = 9995
 
         self.parent_frame = parent_frame
 
@@ -148,7 +148,7 @@ class ChatScreen:
     def send_messages(self, clients, msg):
         for client in clients.copy():
             try:
-                client.send(msg.encode('utf-8'))
+                client.send(msg.encode())
             except:
                 clients.remove(client)
                 print("Client disconnected")
@@ -163,24 +163,18 @@ class ChatScreen:
         FILE_MARKER = "<FILE>"
 
         filename = tkinter.filedialog.askopenfilename()
-        file_size = os.path.getsize(filename)
         if filename:
             with open(filename, 'rb') as f:
                 file_contents = f.read()
-
-            header = f"{FILE_MARKER}{filename}:{file_size}"
-            self.client_socket.send(header.encode())
-            self.client_socket.send(file_contents)
-
+            file_contents_str = f"{FILE_MARKER}{filename}{FILE_MARKER}{file_contents}"
             self.textbox.configure(state="normal")
             filename_only = os.path.basename(filename)
+            print("file_contents_str", file_contents_str)
             self.textbox.insert("end", f"[You sent {filename_only}]\n", 'cyan')
             self.textbox.tag_config('cyan', foreground='cyan')
             self.textbox.configure(state="disabled")
 
             send_thread = threading.Thread(
-                target=self.send_messages, args=(self.clients, header))
+                target=self.send_messages, args=(self.clients, file_contents_str))
             send_thread.daemon = True
             send_thread.start()
-
-

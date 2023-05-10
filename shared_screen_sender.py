@@ -1,5 +1,5 @@
 import threading
-from shared_screen_module import ScreenShareClient
+from vidstream import ScreenShareClient
 import socket
 import time
 from utils.db_connection import get_database
@@ -11,8 +11,8 @@ values = ()
 cursor.execute(query,)
 result = cursor.fetchall()
 
-# ip_addresses = ["192.168.1.12", "192.168.137.1"]
-ip_addresses = [r[0] for r in result]
+ip_addresses = ["192.168.0.115", "192.168.137.1", 'localhost']
+# ip_addresses = [r[0] for r in result]
 ports = [9999, 9998, 9997, 9996, 9995]
 senders = []
 threads = []

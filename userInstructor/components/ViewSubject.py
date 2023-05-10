@@ -3,6 +3,8 @@ from tkinter import messagebox
 
 import customtkinter
 import subprocess
+import os
+import signal
 
 from utils.db_connection import get_database
 
@@ -13,6 +15,9 @@ class ViewSubjectFrame:
 
         self.parent_frame = parent_frame
         self.id = id
+        
+        self.sender_process = None # Initialize sender_process as None
+
 
         self.view_subject_frame = customtkinter.CTkScrollableFrame(
             self.parent_frame)
@@ -54,11 +59,9 @@ class ViewSubjectFrame:
             self.subject_left_container, values=self.optionsSubject, width=200, command=self.update_subject_table)
         self.add_subject_desc_entry.grid(row=1, column=1, padx=5, pady=5)
 
-        def start_sender():
-            subprocess.Popen("python shared_screen_sender.py", shell=True)
 
         self.share_screen = customtkinter.CTkButton(
-            self.subject_left_container, fg_color="green", text="💻 Share Screen", width=200, command=start_sender)
+            self.subject_left_container, fg_color="green", text="💻 Share Screen", width=200, command=self.toggle_sender)
         self.share_screen.grid(row=2, column=1, padx=5, pady=5)
 
         # # bind the callback function to the OptionMenu object's "<<ComboboxSelected>>" event
@@ -128,3 +131,38 @@ class ViewSubjectFrame:
 
         cursor.close()
         db.close()
+
+    def toggle_sender(self):
+        if self.sender_process is not None: # If sender_process is running
+            subprocess.Popen(["pkill", "-f", "shared_screen_sender.py"])
+            
+            """
+            Raising the SIGINT signal in the current process and all sub-processes.
+
+            os.kill() only issues a signal in the current process (without subprocesses).
+            CTRL+C on the console sends the signal to the process group (which we need).
+            """
+            # Handle the `Ctrl`+`C` keyboard shortcut.
+            if hasattr(signal, 'CTRL_C_EVENT'):
+                # windows. Need CTRL_C_EVENT to raise the signal in the whole process group
+                os.kill(os.getpid(), signal.CTRL_C_EVENT)
+                subprocess.Popen(["pkill", "-f", "shared_screen_sender.py"])
+                
+            else:
+                # unix.
+                pgid = os.getpgid(os.getpid())
+                subprocess.Popen(["pkill", "-f", "shared_screen_sender.py"])
+                
+                if pgid == 1:
+                    # os.kill(os.getpid(), signal.SIGINT)
+                    # Kill all processes with the name shared_screen_sender.py
+                    subprocess.Popen(["pkill", "-f", "shared_screen_sender.py"])
+                else:
+                    # os.killpg(os.getpgid(os.getpid()), signal.SIGINT)
+                    subprocess.Popen(["pkill", "-f", "shared_screen_sender.py"])
+
+            self.sender_process = None # Set sender_process to None
+            self.share_screen.configure(fg_color="green", text="💻 Share Screen") # Change button text to "Share Screen"
+        else: # If sender_process is not running
+            self.sender_process = subprocess.Popen("python shared_screen_sender.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
+            self.share_screen.configure(fg_color="red", text="🚫 Stop Share Screen") # Change button text to "Stop Share Screen"
