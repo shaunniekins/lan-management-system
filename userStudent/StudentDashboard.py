@@ -9,10 +9,17 @@ from utils.register_user_ip_address import check_user_ip_address, close_lan_acti
 from userStudent.components.AddSubject import AddSubjectFrame
 from userStudent.components.Chat import ChatScreen
 
+from utils.db_connection import get_database
+
+import datetime
 
 class StudentDashboard(customtkinter.CTk):
     def __init__(self, id, first_name, last_name, appearance_mode, user_type):
         super().__init__()
+        
+        self.id = id
+        self.mark_attendance()
+        
 
         self.frames = {}
 
@@ -171,3 +178,27 @@ class StudentDashboard(customtkinter.CTk):
             self.add_subject_frame.add_subject_frame.pack_forget()
             self.chat_frame.chat_frame.pack(
                 fill="both", expand=True)
+
+    def mark_attendance(self):
+        print('im here')
+        # get current date and time
+        current_date_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # check if attendance has already been marked for this student on this date
+        db = get_database()
+        cursor = db.cursor()
+        query = "SELECT * FROM student_attendance WHERE student_number = %s AND date = %s"
+        values = (self.id, current_date_time.split()[0])
+        cursor.execute(query, values)
+        attendance_data = cursor.fetchone()
+
+        if attendance_data:
+            # attendance already marked for this student on this date
+            print("Attendance already marked for student ", self.id, " on ", current_date_time.split()[0])
+        else:
+            # attendance not yet marked, insert values to table
+            query = "INSERT INTO student_attendance (student_number, date, time) VALUES (%s, %s, %s)"
+            values = (self.id, current_date_time.split()[0], current_date_time.split()[1])
+            cursor.execute(query, values)
+            db.commit()
+            db.close()

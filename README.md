@@ -1,4 +1,7 @@
-
+### v4:
+- Added additional functionalities for attendance in Instructor's end
+- Added printing of attendance
+- Automation of marking student present when logging in
 ### v3:
 - pyRD file directory renamed as remote_control
 - updated the remote_control inside Instructor Dashboard for integration in the gui (temporary)
