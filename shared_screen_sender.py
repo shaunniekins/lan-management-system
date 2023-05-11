@@ -6,13 +6,13 @@ from utils.db_connection import get_database
 
 db = get_database()
 cursor = db.cursor()
-query = "SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student';"
+query = "SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student' AND is_active=1;"
 values = ()
 cursor.execute(query,)
 result = cursor.fetchall()
 
-ip_addresses = ["192.168.0.115", "192.168.137.1", 'localhost']
-# ip_addresses = [r[0] for r in result]
+# ip_addresses = ["192.168.0.115", "192.168.137.1", 'localhost']
+ip_addresses = [r[0] for r in result]
 ports = [9999, 9998, 9997, 9996, 9995]
 senders = []
 threads = []

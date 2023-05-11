@@ -140,21 +140,7 @@ class StudentDashboard(customtkinter.CTk):
 
     def view_shared_screen_event(self):
         if self.receiver_process is not None:
-            subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
-            if hasattr(signal, 'CTRL_C_EVENT'):
-                os.kill(os.getpid(), signal.CTRL_C_EVENT)
-                subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
-                
-            else:
-                # unix.
-                pgid = os.getpgid(os.getpid())
-                subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
-                
-                if pgid == 1:
-                    subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
-                else:
-                    subprocess.Popen(["pkill", "-f", "shared_screen_receiver.py"])
-
+            subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
             self.receiver_process = None
             self.sidebar_view_shared_screen.configure(fg_color="green", text="View Screen") # Change button text to "Share Screen"
         else:
