@@ -1,35 +1,24 @@
 from utils.db_connection import get_database
-import webview
 import customtkinter
 import tkinterweb
 import tkinter as tk
-# import tkinterweb
-# import customtkinter
 import socket
-import webbrowser
 import subprocess
-
-
 
 class RemoteAccessFrame:
     def __init__(self, parent_frame, id):
         self.parent_frame = parent_frame
         self.id = id
-        # remote access frame
+        
         self.remote_access_frame = customtkinter.CTkScrollableFrame(
             self.parent_frame)
-        # add this line to initialize the object
         self.remote_access_frame.pack(fill="both", expand=True)
 
         self.container_remote = customtkinter.CTkFrame(
             self.remote_access_frame)
         self.container_remote.pack(fill='both', expand=True)
 
-        # app_process = subprocess.Popen(['python', 'app.py'])
-
         subprocess.Popen(['python', 'remote_control/app.py'])
-        # When you're done, you can terminate the Flask app process
-        # app_process.terminate()
 
         self.frames = []
         
@@ -38,15 +27,17 @@ class RemoteAccessFrame:
         
         db = get_database()
         cursor = db.cursor()
-        query = "SELECT COUNT(user_id) FROM `active_user_ip` WHERE user_type='student' AND is_active=0;"
+        query = "SELECT COUNT(user_id) FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
         cursor.execute(query, )
         result = cursor.fetchone()[0]
         
-        print("ip_address: ", {ip_address})
+        print("ip_address: ", ip_address)
         
 
         # Generate the list of websites with the appropriate number of "google.com" entries
         self.websites = [ip_address for _ in range(int(result))]
+        print("website: ", self.websites[0])
+        
 
         # Set the number of frames per row
         frames_per_row = 3
@@ -125,8 +116,6 @@ class RemoteAccessFrame:
         
     def on_close(self):
         print("im here on close")
-        # When you're done, you can terminate the Flask app process
-        # self.app_process.terminate()
         subprocess.Popen(["pkill", "-9", "-f", "app.py"])
 
     def shutdown(self):

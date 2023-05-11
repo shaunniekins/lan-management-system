@@ -5,15 +5,19 @@ import customtkinter
 import socket
 from vidstream import StreamingServer
 import threading
+# from remote_control import main
+from remote_control import remote
 
 
 from utils.db_connection import get_database
 
 
 class ChatScreen:
-    def __init__(self, parent_frame):
-
+    def __init__(self, parent_frame, id):
         super().__init__()
+
+        self.parent_frame = parent_frame
+        self.id = id
 
         # self.HOST = 'localhost'
         self.PORT = 9990
@@ -40,7 +44,7 @@ class ChatScreen:
             SELECT user_instructor.last_name, user_instructor.first_name, active_user_ip.ip_address
             FROM active_user_ip
             INNER JOIN user_instructor ON active_user_ip.user_id = user_instructor.id
-            WHERE user_type='instructor' AND is_active=0
+            WHERE user_type='instructor' AND is_active=1
             ORDER BY (user_instructor.last_name) ASC;
         """
         cursor.execute(query)
@@ -71,6 +75,13 @@ class ChatScreen:
                 target=self.receive_messages)
             self.receive_thread.daemon = True
             self.receive_thread.start()
+            print('host: ', self.HOST)
+            
+            host = (f'{self.HOST}:5000')
+            key = self.id
+            print('host: ', host)
+            
+            remote.main(host, key)
 
     def receive_messages(self):
         host = self.HOST
