@@ -30,9 +30,6 @@ class RemoteAccessFrame:
         query = "SELECT COUNT(user_id) FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
         cursor.execute(query, )
         result = cursor.fetchone()[0]
-        
-        print("ip_address: ", ip_address)
-        
 
         # Generate the list of websites with the appropriate number of "google.com" entries
         self.websites = [ip_address for _ in range(int(result))]
@@ -42,42 +39,42 @@ class RemoteAccessFrame:
         # Set the number of frames per row
         frames_per_row = 3
         frame_count = 0
+        if result:
+            for website in self.websites:
+                # create a new row if we've reached the maximum number of frames per row
+                if frame_count % frames_per_row == 0:
+                    row = len(self.frames) // frames_per_row
+                    self.container_remote.grid_rowconfigure(row, weight=1)
 
-        for website in self.websites:
-            # create a new row if we've reached the maximum number of frames per row
-            if frame_count % frames_per_row == 0:
-                row = len(self.frames) // frames_per_row
-                self.container_remote.grid_rowconfigure(row, weight=1)
+                # create a new frame and add it to the current row
+                self.frame = tkinterweb.HtmlFrame(
+                    self.container_remote, width=5, height=5)
+                self.frame.load_website(website)
+                self.frame.grid(row=len(self.frames) // frames_per_row,
+                                column=frame_count % frames_per_row, pady=10, padx=10, sticky="nsew")
+                self.frames.append(self.frame)
 
-            # create a new frame and add it to the current row
-            self.frame = tkinterweb.HtmlFrame(
-                self.container_remote, width=5, height=5)
-            self.frame.load_website(website)
-            self.frame.grid(row=len(self.frames) // frames_per_row,
-                            column=frame_count % frames_per_row, pady=10, padx=10, sticky="nsew")
-            self.frames.append(self.frame)
+                # create a new button and place it in the frame
+                self.buttonMenu = customtkinter.CTkButton(
+                    self.frame, text="⋮", font=("Arial", 30, 'bold'), width=2)
+                self.buttonMenu.place(relx=1.0, x=-10, y=10, anchor="ne")
 
-            # create a new button and place it in the frame
-            self.buttonMenu = customtkinter.CTkButton(
-                self.frame, text="⋮", font=("Arial", 30, 'bold'), width=2)
-            self.buttonMenu.place(relx=1.0, x=-10, y=10, anchor="ne")
+                # create a popup menu and add options
+                self.popup_menu = tk.Menu(self.buttonMenu, tearoff=0)
+                self.popup_menu.add_command(
+                    label="View", command=lambda website=website: self.view_website(website))
+                self.popup_menu.add_command(
+                    label="Shutdown", command=self.shutdown)
 
-            # create a popup menu and add options
-            self.popup_menu = tk.Menu(self.buttonMenu, tearoff=0)
-            self.popup_menu.add_command(
-                label="View", command=lambda website=website: self.view_website(website))
-            self.popup_menu.add_command(
-                label="Shutdown", command=self.shutdown)
+                # bind the popup menu to the button
+                def popup(event, popup_menu=self.popup_menu):
+                    popup_menu.post(event.x_root, event.y_root)
 
-            # bind the popup menu to the button
-            def popup(event, popup_menu=self.popup_menu):
-                popup_menu.post(event.x_root, event.y_root)
+                self.buttonMenu.bind("<Button-1>", popup)
 
-            self.buttonMenu.bind("<Button-1>", popup)
+                self.popup_menu.posted = False
 
-            self.popup_menu.posted = False
-
-            frame_count += 1
+                frame_count += 1
 
             
         # configure the columns to be evenly sized
@@ -115,7 +112,8 @@ class RemoteAccessFrame:
         self.go_back_button.destroy()
         
     def on_close(self):
-        subprocess.Popen(["pkill", "-9", "-f", "app.py"])
+        # subprocess.Popen(["pkill", "-9", "-f", "app.py"])
+        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
 
     def shutdown(self):
         """Shutdown the remote access"""

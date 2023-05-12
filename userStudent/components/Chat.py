@@ -170,9 +170,6 @@ class ChatScreen:
                 self.textbox.delete('1.0', 'end')
                 self.textbox.configure(state="disabled")
 
-
-    # def on_close(self):
-    #     subprocess.Popen(["pkill", "-9", "-f", "app.py"])
     def messages(self, event=None):
         msg = self.message_entry.get()
 
