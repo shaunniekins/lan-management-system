@@ -132,26 +132,15 @@ class ViewSubjectFrame:
         cursor.close()
         db.close()
 
+    def on_close(self):
+        subprocess.Popen(["pkill", "-9", "-f", "shared_screen_sender.py"])
+        
     def toggle_sender(self):
         if self.sender_process is not None:  # If sender_process is running
             subprocess.Popen(["pkill", "-9", "-f", "shared_screen_sender.py"])
-            # Handle the `Ctrl`+`C` keyboard shortcut.
-            # if hasattr(signal, 'CTRL_C_EVENT'):
-            #     # windows. Need CTRL_C_EVENT to raise the signal in the whole process group
-            #     os.kill(os.getpid(), signal.CTRL_C_EVENT)
-            #     subprocess.Popen(["pkill", "-9", "-f", "shared_screen_sender.py"])
-            # else:
-            #     # unix.
-            #     pgid = os.getpgid(os.getpid())
-            #     subprocess.Popen(["pkill", "-9", "-f", "shared_screen_sender.py"])
-            #     if pgid == 1:
-            #         # Kill all processes with the name shared_screen_sender.py
-            #         subprocess.Popen(["pkill", "-9", "-f", "shared_screen_sender.py"])
-            #     else:
-            #         subprocess.Popen(["pkill", "-9", "-f", "shared_screen_sender.py"])
             self.sender_process.wait()  # Wait for the sender process to exit
             self.sender_process = None  # Set sender_process to None
-            self.share_screen.configure(fg_color="green", text="💻 Share Screen")  # Change button text to "Share Screen"
+            self.share_screen.configure(fg_color="green", text="💻 Share Screen")
         else:  # If sender_process is not running
-            self.sender_process = subprocess.Popen("python shared_screen_sender.py", shell=True, preexec_fn=os.setpgrp)  # Start the sender_process in a new process group
-            self.share_screen.configure(fg_color="red", text="🚫 Stop Share Screen")  # Change button text to "Stop Share Screen"
+            # self.sender_process = subprocess.Popen("python shared_screen_sender.py", shell=True, preexec_fn=os.setpgrp)  # Start the sender_process in a new process group
+            self.share_screen.configure(fg_color="red", text="🚫 Stop Share Screen") 

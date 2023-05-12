@@ -1,12 +1,9 @@
 import socket
 import threading
 
-# HOST = '192.168.0.115'
-# PORT = 9990
-
 hostname = socket.gethostname()
 HOST = socket.gethostbyname(hostname)
-PORT = 9990
+PORT = 9995
 
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))

@@ -82,6 +82,11 @@ class ChatScreen:
         self.send_msg_container.columnconfigure(0, weight=1)
         self.send_msg_container.columnconfigure(5, weight=0)
         self.send_msg_container.columnconfigure(6, weight=0)
+        
+        self.receive_thread = threading.Thread(
+            target=self.accept_connections)
+        self.receive_thread.daemon = True
+        self.receive_thread.start()
 
     def accept_connections(self):
         while True:
@@ -178,3 +183,23 @@ class ChatScreen:
                 target=self.send_messages, args=(self.clients, file_contents_str))
             send_thread.daemon = True
             send_thread.start()
+
+    def receive_messages(self):
+        host = self.HOST
+
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((self.HOST, self.PORT))
+
+        while not self.receive_messages_stop:
+            msg = client_socket.recv(1024).decode('utf-8')
+
+            if not msg:
+                break
+            self.textbox.configure(state="normal")
+            self.textbox.insert("end", "Instructor: ", 'yellow')
+            self.textbox.insert("end", f"{msg}\n", 'white')
+            self.textbox.tag_config('yellow', foreground='yellow')
+            self.textbox.tag_config('white', foreground='white')
+            self.textbox.configure(state="disabled")
+
+        client_socket.close()

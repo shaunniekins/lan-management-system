@@ -115,7 +115,6 @@ class RemoteAccessFrame:
         self.go_back_button.destroy()
         
     def on_close(self):
-        print("im here on close")
         subprocess.Popen(["pkill", "-9", "-f", "app.py"])
 
     def shutdown(self):

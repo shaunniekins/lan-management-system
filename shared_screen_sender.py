@@ -6,17 +6,24 @@ from utils.db_connection import get_database
 
 db = get_database()
 cursor = db.cursor()
-query = "SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student' AND is_active=1;"
-values = ()
-cursor.execute(query,)
-result = cursor.fetchall()
+# query = "SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student' AND is_active=1;"
+# values = ()
+# cursor.execute(query,)
+# result = cursor.fetchall()
 
-# ip_addresses = ["192.168.0.115", "192.168.137.1", 'localhost']
-ip_addresses = [r[0] for r in result]
+# ip_addresses = [r[0] for r in result]
 ports = [9999, 9998, 9997, 9996, 9995]
 senders = []
 threads = []
 connected_addresses = set()
+timer_interval = 5000
+
+
+def get_ip_addresses():
+    cursor.execute("SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student' AND is_active=1;")
+    result = cursor.fetchall()
+    return [r[0] for r in result]
+
 
 
 def is_server_available(ip_address, port):
@@ -38,6 +45,7 @@ def create_sender(ip_address, port):
 
 
 while True:
+    ip_addresses = get_ip_addresses()
     for ip_address in ip_addresses:
         if ip_address in connected_addresses:
             continue
@@ -52,6 +60,18 @@ while True:
 
     print("Not all IP addresses available. Retrying in 5 seconds...")
     time.sleep(5)
+
+def check_for_updates():
+    while True:
+        time.sleep(5) # check every 60 seconds
+        new_ip_addresses = get_ip_addresses()
+        if new_ip_addresses != ip_addresses:
+            # update ip_addresses and create new senders if necessary
+            ip_addresses = new_ip_addresses
+            # rest of the code
+
+update_timer = threading.Thread(target=check_for_updates)
+update_timer.start()
 
 
 while input("") != 'STOP':

@@ -10,7 +10,7 @@ except Exception as e:
 
 db = get_database()
 cursor = db.cursor()
-query = "SELECT user_id FROM `active_user_ip` WHERE user_type='instructor' AND is_active=1;"
+query = "SELECT user_id FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
 cursor.execute(query, )
 
 

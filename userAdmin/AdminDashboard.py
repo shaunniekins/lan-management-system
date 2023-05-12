@@ -2,14 +2,14 @@ import tkinter
 from tkinter import ttk
 from tkinter import messagebox
 import socket
-
+import time
 
 import customtkinter
 from utils.register_user_ip_address import check_user_ip_address, close_lan_active
 
 from userAdmin.components.CreateAccount import CreateAccountFrame
 from userAdmin.components.AddItems import AddItemsFrame
-from userAdmin.components.ViewLabServer import ViewLabServerFrame
+# from userAdmin.components.ViewLabServer import ViewLabServerFrame
 from userAdmin.components.RemoteAccess import RemoteAccessFrame
 
 
@@ -78,25 +78,38 @@ class AdminDashboard(customtkinter.CTk):
             master=self.logout_logo_container,
             text=f'Hi, {self.first_name} {self.last_name}',
             font=customtkinter.CTkFont(size=15, weight="normal"))
-        self.logo_label.grid(row=0, column=0, padx=10)
+        self.logo_label.grid(row=0, column=0, padx=(1500,10))
 
         db = get_database()
-        cursor = db.cursor()
-        query = "SELECT user_id, ip_address FROM `active_user_ip` WHERE user_type='admin' AND is_active=1;"
+        cursor = db.cursor()        
+        query = "SELECT user_id, ip_address FROM `active_user_ip` WHERE user_type='instructor' AND is_active=1;"
         cursor.execute(query)
-
         results = cursor.fetchall()
-        text = "Online servers:\n"
+        self.text = "Online servers:\n"
+        # for result in results:
+        #     user_id, ip_address = result
+        #     self.text += f"- User {user_id}: {ip_address}\n"
+            
+        idCursor = db.cursor()        
+        idQuery = "SELECT user_instructor.id, CONCAT(user_instructor.last_name, ', ', user_instructor.first_name) AS Name FROM user_instructor INNER JOIN active_user_ip ON active_user_ip.user_id = user_instructor.id;"
+        idCursor.execute(idQuery)
+        idResults = idCursor.fetchall()
+        
+              
         for result in results:
             user_id, ip_address = result
-            text += f"- User {user_id}: {ip_address}\n"
+            for idResult in idResults:
+                id, name = idResult
+                if id == user_id:
+                    self.text += f"{name}: {ip_address}\n"
+                    break
 
 
         self.online_servers_lbl = customtkinter.CTkLabel(
             master=self.topbar_container,
-            text=text,
+            text=self.text,
             font=customtkinter.CTkFont(size=12, weight="normal"))
-        self.online_servers_lbl.grid(row=1, column=6, padx=10, pady=10)
+        self.online_servers_lbl.grid(row=1, column=6, padx=(1500,10), pady=10)
 
 
         # self.logout_logo_container.grid_rowconfigure(0, weight=1)
@@ -123,13 +136,15 @@ class AdminDashboard(customtkinter.CTk):
             master=self.sidebar_container, text="Add Items", command=lambda: self.sidebar_button_event(self.sidebar_add_items))
         self.sidebar_add_items.pack(pady=10)
 
-        self.sidebar_view_lab_server = customtkinter.CTkButton(
-            master=self.sidebar_container, text="View Lab Servers", command=lambda: self.sidebar_button_event(self.sidebar_view_lab_server))
-        self.sidebar_view_lab_server.pack(pady=10)
+        # self.sidebar_view_lab_server = customtkinter.CTkButton(
+        #     master=self.sidebar_container, text="View Lab Servers", command=lambda: self.sidebar_button_event(self.sidebar_view_lab_server))
+        # self.sidebar_view_lab_server.pack(pady=10)
 
         self.sidebar_remote_access = customtkinter.CTkButton(
             master=self.sidebar_container, text="Remote Access", command=lambda: self.sidebar_button_event(self.sidebar_remote_access))
         self.sidebar_remote_access.pack(pady=10)
+        
+        self.sidebar_remote_access.pack_forget()
 
         self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_container, values=["80%", "90%", "100%", "110%", "120%"],
                                                                command=self.change_scaling_event)
@@ -157,7 +172,7 @@ class AdminDashboard(customtkinter.CTk):
         self.add_items_frame = AddItemsFrame(self.main_frame)
 
         # view lab server frame
-        self.view_lab_server_frame = ViewLabServerFrame(self.main_frame)
+        # self.view_lab_server_frame = ViewLabServerFrame(self.main_frame)
 
         # remote access frame
         self.remote_access_frame = RemoteAccessFrame(self.main_frame)
@@ -188,6 +203,38 @@ class AdminDashboard(customtkinter.CTk):
 
     # bind the function to the window close event
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
+        self.timer_interval = 5000  # 5 seconds
+        self.check_for_new_data()
+            
+    def check_for_new_data(self):
+        db = get_database()
+        cursor = db.cursor()        
+        query = "SELECT user_id, ip_address FROM `active_user_ip` WHERE user_type='instructor' AND is_active=1;"
+        cursor.execute(query)
+        results = cursor.fetchall()
+        
+        
+        idCursor = db.cursor()        
+        idQuery = "SELECT user_instructor.id, CONCAT(user_instructor.last_name, ', ', user_instructor.first_name) AS Name FROM user_instructor INNER JOIN active_user_ip ON active_user_ip.user_id = user_instructor.id;"
+        idCursor.execute(idQuery)
+        idResults = idCursor.fetchall()
+        
+        new_text = ''
+        
+        for result in results:
+            user_id, ip_address = result
+            for idResult in idResults:
+                id, name = idResult
+                if id == user_id:
+                    new_text += f"{name}: {ip_address}\n"
+                    break
+                    
+        
+        self.online_servers_lbl.configure(text=new_text)
+
+        db.close()
+        self.sidebar_frame.after(self.timer_interval, self.check_for_new_data)
 
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
@@ -216,7 +263,7 @@ class AdminDashboard(customtkinter.CTk):
 
     def sidebar_button_event(self, button):
         # disable the clicked button and enable all other buttons
-        for btn in [self.sidebar_register_instructor, self.sidebar_add_items, self.sidebar_view_lab_server, self.sidebar_remote_access]:
+        for btn in [self.sidebar_register_instructor, self.sidebar_add_items, self.sidebar_remote_access]:
             if btn == button:
                 btn.configure(state="disabled")
             else:
@@ -227,23 +274,19 @@ class AdminDashboard(customtkinter.CTk):
             self.create_account_frame.create_account_frame.pack(
                 fill="both", expand=True)
             self.add_items_frame.add_items_frame.pack_forget()
-            self.view_lab_server_frame.view_lab_server_frame.pack_forget()
+            # self.view_lab_server_frame.view_lab_server_frame.pack_forget()
             self.remote_access_frame.remote_access_frame.pack_forget()
         elif button == self.sidebar_add_items:
             self.create_account_frame.create_account_frame.pack_forget()
             self.add_items_frame.add_items_frame.pack(fill="both", expand=True)
-            self.view_lab_server_frame.view_lab_server_frame.pack_forget()
+            # self.view_lab_server_frame.view_lab_server_frame.pack_forget()
             self.remote_access_frame.remote_access_frame.pack_forget()
-        elif button == self.sidebar_view_lab_server:
-            self.create_account_frame.create_account_frame.pack_forget()
-            self.add_items_frame.add_items_frame.pack_forget()
-            self.view_lab_server_frame.view_lab_server_frame.pack(
-                fill="both", expand=True)
+
             self.remote_access_frame.remote_access_frame.pack_forget()
         elif button == self.sidebar_remote_access:
             self.create_account_frame.create_account_frame.pack_forget()
             self.add_items_frame.add_items_frame.pack_forget()
-            self.view_lab_server_frame.view_lab_server_frame.pack_forget()
+            # self.view_lab_server_frame.view_lab_server_frame.pack_forget()
             self.remote_access_frame.remote_access_frame.pack(
                 fill="both", expand=True)
 

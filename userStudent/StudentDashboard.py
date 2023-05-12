@@ -122,7 +122,7 @@ class StudentDashboard(customtkinter.CTk):
 
         # frames
         self.add_subject_frame = AddSubjectFrame(self.main_frame, self.id)
-        self.chat_frame = ChatScreen(self.main_frame)
+        self.chat_frame = ChatScreen(self.main_frame, self.id)
 
         self.sidebar_button_event(self.sidebar_add_subject)
 
@@ -136,7 +136,11 @@ class StudentDashboard(customtkinter.CTk):
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             close_lan_active(self.id, 0)
+            self.on_close()
             self.destroy()
+            
+    def on_close(self):
+        subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
 
     def view_shared_screen_event(self):
         if self.receiver_process is not None:
@@ -151,6 +155,7 @@ class StudentDashboard(customtkinter.CTk):
     def on_window_close(self, window):
         # Enable the button when the window is closed
         self.sidebar_view_shared_screen.configure(state='normal')
+        subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
         window.destroy()
 
     def logout_event(self):
@@ -159,6 +164,8 @@ class StudentDashboard(customtkinter.CTk):
         close_lan_active(self.id, 0)
 
         login_window = App()
+        subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+        self.on_close()
         self.destroy()
         login_window.mainloop()
 

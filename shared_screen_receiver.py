@@ -1,5 +1,5 @@
 from vidstream import StreamingServer
-import threadingz
+import threading
 import socket
 
 
@@ -24,4 +24,4 @@ def start_receiver(ip_address, port):
 
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
-start_receiver(ip_address, 9999)
+start_receiver(ip_address, 9995)
