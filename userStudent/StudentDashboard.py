@@ -151,8 +151,8 @@ class StudentDashboard(customtkinter.CTk):
             self.receiver_process = None
             self.sidebar_view_shared_screen.configure(fg_color="green", text="View Screen") # Change button text to "Share Screen"
         else:
-            # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
-            self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
+            # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
             self.sidebar_view_shared_screen.configure(fg_color="red", text="Stop View Screen") # Change button text to "Stop Share Screen"
         
 

@@ -5,7 +5,6 @@ import customtkinter
 import socket
 from vidstream import StreamingServer
 import threading
-# from remote_control import main
 # from remote_control import remote
 import subprocess
 

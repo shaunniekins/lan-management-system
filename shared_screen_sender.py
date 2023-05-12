@@ -8,7 +8,7 @@ db = get_database()
 cursor = db.cursor()
 query = "SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student' AND is_active=1;"
 values = ()
-cursor.execute(query,)
+cursor.execute(query, )
 result = cursor.fetchall()
 
 ip_addresses = [r[0] for r in result]
@@ -36,22 +36,31 @@ def create_sender(ip_address, port):
         thread.start()
 
 
-while True:
-    for ip_address in ip_addresses:
-        if ip_address in connected_addresses:
-            continue
-        for port in ports:
-            if is_server_available(ip_address, port):
-                connected_addresses.add(ip_address)
-                create_sender(ip_address, port)
-        time.sleep(1)  # wait 1 second before checking for next IP address
+def check_active_user_ip():
+    while True:
+        cursor.execute(query, )
+        result = cursor.fetchall()
+        updated_ip_addresses = {r[0] for r in result}
 
-    if len(connected_addresses) == len(ip_addresses):
-        break
+        # Check for new IP addresses
+        new_ip_addresses = updated_ip_addresses - connected_addresses
+        for ip_address in new_ip_addresses:
+            for port in ports:
+                if is_server_available(ip_address, port):
+                    connected_addresses.add(ip_address)
+                    create_sender(ip_address, port)
 
-    print("Not all IP addresses available. Retrying in 5 seconds...")
-    time.sleep(5)
+        # Check for disconnected IP addresses
+        disconnected_ip_addresses = connected_addresses - updated_ip_addresses
+        for ip_address in disconnected_ip_addresses:
+            connected_addresses.remove(ip_address)
 
+        time.sleep(5)  # Wait 5 seconds before checking for updates again
+
+
+# Start the initial check
+check_active_user_ip_thread = threading.Thread(target=check_active_user_ip)
+check_active_user_ip_thread.start()
 
 while input("") != 'STOP':
     # check if any sender has disconnected
@@ -60,21 +69,26 @@ while input("") != 'STOP':
             senders.remove(sender)
 
     # check if any new server is available
-    for ip_address in ip_addresses:
-        if ip_address in connected_addresses:
-            continue
+    cursor.execute(query, )
+    result = cursor.fetchall()
+    updated_ip_addresses = {r[0] for r in result}
+
+    new_ip_addresses = updated_ip_addresses - connected_addresses
+    for ip_address in new_ip_addresses:
         for port in ports:
             if is_server_available(ip_address, port):
                 connected_addresses.add(ip_address)
                 create_sender(ip_address, port)
+
     time.sleep(1)  # wait 1 second before checking again
 
+# Stop the periodic check
+check_active_user_ip_thread.join()
 
 for sender in senders:
     thread = threading.Thread(target=sender[0].start_stream)
     thread.start()
     threads.append(thread)
-
 
 for thread in threads:
     thread.join()

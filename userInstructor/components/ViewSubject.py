@@ -144,6 +144,6 @@ class ViewSubjectFrame:
             # self.sender_process.wait()  # Wait for the sender process to exit
             self.share_screen.configure(fg_color="green", text="💻 Share Screen")
         else:  # If sender_process is not running
-            # self.sender_process = subprocess.Popen("python shared_screen_sender.py", shell=True, preexec_fn=os.setpgrp)  # Start the sender_process in a new process group
-            self.sender_process = subprocess.Popen("start python shared_screen_sender.py", shell=True)
+            self.sender_process = subprocess.Popen("python shared_screen_sender.py", shell=True, preexec_fn=os.setpgrp)  # Start the sender_process in a new process group
+            # self.sender_process = subprocess.Popen("start python shared_screen_sender.py", shell=True)
             self.share_screen.configure(fg_color="red", text="🚫 Stop Share Screen") 

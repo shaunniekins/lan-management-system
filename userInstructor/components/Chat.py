@@ -166,23 +166,52 @@ class ChatScreen:
 
     def send_file(self):
         FILE_MARKER = "<FILE>"
+        # self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.server.bind((self.HOST, self.PORT))
+        # self.server.listen()
+
+        # client_socket, client_address = self.server.accept()
+        
+        # filename = tkinter.filedialog.askopenfilename()
+        # if filename:
+        #     with open(filename, 'rb') as f:
+        #         file_contents = f.read()
+        #     file_contents_str = f"{FILE_MARKER}{filename}{FILE_MARKER}{file_contents}"
+        #     self.textbox.configure(state="normal")
+        #     filename_only = os.path.basename(filename)
+        #     print("file_contents_str", file_contents_str)
+        #     self.textbox.insert("end", f"[You sent {filename_only}]\n", 'cyan')
+        #     self.textbox.tag_config('cyan', foreground='cyan')
+        #     self.textbox.configure(state="disabled")
 
         filename = tkinter.filedialog.askopenfilename()
         if filename:
             with open(filename, 'rb') as f:
                 file_contents = f.read()
-            file_contents_str = f"{FILE_MARKER}{filename}{FILE_MARKER}{file_contents}"
+            # file_contents_str = f"{FILE_MARKER}{filename}{FILE_MARKER}{file_contents}"
             self.textbox.configure(state="normal")
             filename_only = os.path.basename(filename)
-            print("file_contents_str", file_contents_str)
             self.textbox.insert("end", f"[You sent {filename_only}]\n", 'cyan')
             self.textbox.tag_config('cyan', foreground='cyan')
-            self.textbox.configure(state="disabled")
-
-            send_thread = threading.Thread(
-                target=self.send_messages, args=(self.clients, file_contents_str))
-            send_thread.daemon = True
-            send_thread.start()
+            self.textbox.configure(state="disabled")    
+            
+            # data  = client_socket.recv(2048)
+            data = filename.read()
+            
+            while data:
+                self.server.write(data)
+                data = filename.read(2048)
+            #     data = client_socket.recv(2048)
+                
+        filename.close()
+        self.server.close()
+        # client_socket.close()
+            
+            
+            # send_thread = threading.Thread(
+            #     target=self.send_messages, args=(self.clients, file_contents_str))
+            # send_thread.daemon = True
+            # send_thread.start()
 
     def receive_messages(self):
         host = self.HOST

@@ -112,8 +112,8 @@ class RemoteAccessFrame:
         self.go_back_button.destroy()
         
     def on_close(self):
-        # subprocess.Popen(["pkill", "-9", "-f", "app.py"])
-        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
+        subprocess.Popen(["pkill", "-9", "-f", "app.py"])
+        # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
 
     def shutdown(self):
         """Shutdown the remote access"""

@@ -48,37 +48,40 @@ class AdminDashboard(customtkinter.CTk):
         # allow the frame to adjust its size based on contents
         self.sidebar_frame.pack_propagate(0)
 
-       # create topbar frame for log-out and user greetings
         self.topbar_frame = customtkinter.CTkFrame(
             self.main_frame, corner_radius=0)
         self.topbar_frame.pack(side="top", fill="x", padx=25)
         self.topbar_frame.pack_propagate(0)
-        self.topbar_frame.configure(height=100)
+        self.topbar_frame.configure(height=40)
 
         self.topbar_container = customtkinter.CTkFrame(self.topbar_frame)
         self.topbar_container.pack(side="right", fill="both", expand=True)
 
-        self.logout_logo_container = customtkinter.CTkFrame(self.topbar_container)
-        self.logout_logo_container.grid(row=0, column=6, sticky='ne', padx=10, pady=10)
-    
-
-
         self.logout_btn = customtkinter.CTkButton(
-            master=self.logout_logo_container,
+            master=self.topbar_container,
             fg_color="red",
             text="⏏️",
             command=self.logout_event,
-            compound="right",
+            compound="left",
             width=20,  # set the width to 50 pixels
             height=20  # set the height to 20 pixels
         )
-        self.logout_btn.grid(row=0, column=1)
+        self.logout_btn.pack(side="right", padx=(10, 0))
 
-        self.logo_label = customtkinter.CTkLabel(
-            master=self.logout_logo_container,
+        self.greetings_label = customtkinter.CTkLabel(
+            master=self.topbar_container,
             text=f'Hi, {self.first_name} {self.last_name}',
             font=customtkinter.CTkFont(size=15, weight="normal"))
-        self.logo_label.grid(row=0, column=0, padx=(1500,10))
+        self.greetings_label.pack(side="right")
+
+        self.sidebar_container = customtkinter.CTkFrame(self.sidebar_frame)
+        self.sidebar_container.pack(fill="both", expand=True)
+
+        self.logo_label = customtkinter.CTkLabel(
+            master=self.sidebar_container,
+            text="Student\nDashboard",
+            font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.logo_label.pack(side="top", pady=(30, 30))
 
         db = get_database()
         cursor = db.cursor()        
@@ -105,28 +108,23 @@ class AdminDashboard(customtkinter.CTk):
                     break
 
 
-        self.online_servers_lbl = customtkinter.CTkLabel(
-            master=self.topbar_container,
-            text=self.text,
-            font=customtkinter.CTkFont(size=12, weight="normal"))
-        self.online_servers_lbl.grid(row=1, column=6, padx=(1500,10), pady=10)
-
+        
 
         # self.logout_logo_container.grid_rowconfigure(0, weight=1)
-        self.logout_logo_container.grid_columnconfigure(0, weight=0)
+        # self.logout_logo_container.grid_columnconfigure(0, weight=0)
         
-        self.online_servers_lbl.grid_columnconfigure(0, weight=0)
+        # self.online_servers_lbl.grid_columnconfigure(0, weight=0)
         
         
 
 
-        # create a container frame inside the sidebar frame
-        self.sidebar_container = customtkinter.CTkFrame(self.sidebar_frame)
-        self.sidebar_container.pack(fill="both", expand=True)
+        # # create a container frame inside the sidebar frame
+        # self.sidebar_container = customtkinter.CTkFrame(self.sidebar_frame)
+        # self.sidebar_container.pack(fill="both", expand=True)
 
-        self.logo_label = customtkinter.CTkLabel(
-            master=self.sidebar_container, text="Admin Dashboard", font=customtkinter.CTkFont(size=20, weight="bold"))
-        self.logo_label.pack(side="top", pady=(30, 30))
+        # self.logo_label = customtkinter.CTkLabel(
+        #     master=self.sidebar_container, text="Admin Dashboard", font=customtkinter.CTkFont(size=20, weight="bold"))
+        # self.logo_label.pack(side="top", pady=(30, 30))
 
         self.sidebar_register_instructor = customtkinter.CTkButton(
             master=self.sidebar_container, text="Create Account", command=lambda: self.sidebar_button_event(self.sidebar_register_instructor), state="disabled")
@@ -146,6 +144,12 @@ class AdminDashboard(customtkinter.CTk):
         
         self.sidebar_remote_access.pack_forget()
 
+        self.online_servers_lbl = customtkinter.CTkLabel(
+            master=self.sidebar_container,
+            text=self.text,
+            font=customtkinter.CTkFont(size=12, weight="normal"))
+        self.online_servers_lbl.pack(pady=10)
+
         self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_container, values=["80%", "90%", "100%", "110%", "120%"],
                                                                command=self.change_scaling_event)
         self.scaling_optionemenu.pack(side="bottom", pady=(0, 30))
@@ -160,6 +164,9 @@ class AdminDashboard(customtkinter.CTk):
         self.appearance_mode_label = customtkinter.CTkLabel(
             master=self.sidebar_container, text="Appearance Mode:", anchor="w")
         self.appearance_mode_label.pack(side="bottom", pady=(0, 10))
+        
+
+
 
         # configure the container frame to fill any extra space in the sidebar frame
         self.sidebar_container.pack_propagate(0)
@@ -227,7 +234,7 @@ class AdminDashboard(customtkinter.CTk):
             for idResult in idResults:
                 id, name = idResult
                 if id == user_id:
-                    new_text += f"{name}: {ip_address}\n"
+                    new_text += f"Active:\n{name}: {ip_address}\n"
                     break
                     
         
