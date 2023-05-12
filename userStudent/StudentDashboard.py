@@ -140,27 +140,27 @@ class StudentDashboard(customtkinter.CTk):
             self.destroy()
             
     def on_close(self):
-        # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
-        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
+        subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+        # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
         
 
     def view_shared_screen_event(self):
         if self.receiver_process is not None:
-            # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
-            subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
+            subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+            # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
             self.receiver_process = None
             self.sidebar_view_shared_screen.configure(fg_color="green", text="View Screen") # Change button text to "Share Screen"
         else:
-            # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-            self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
+            # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
+            self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
             self.sidebar_view_shared_screen.configure(fg_color="red", text="Stop View Screen") # Change button text to "Stop Share Screen"
         
 
     def on_window_close(self, window):
         # Enable the button when the window is closed
         self.sidebar_view_shared_screen.configure(state='normal')
-        # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
-        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
+        subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+        # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
         window.destroy()
 
     def logout_event(self):
@@ -169,8 +169,8 @@ class StudentDashboard(customtkinter.CTk):
         close_lan_active(self.id, 0)
 
         login_window = App()
-        # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
-        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
+        subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+        # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
         self.on_close()
         self.destroy()
         login_window.mainloop()
@@ -199,7 +199,6 @@ class StudentDashboard(customtkinter.CTk):
                 fill="both", expand=True)
 
     def mark_attendance(self):
-        print('im here')
         # get current date and time
         current_date_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -211,11 +210,7 @@ class StudentDashboard(customtkinter.CTk):
         cursor.execute(query, values)
         attendance_data = cursor.fetchone()
 
-        if attendance_data:
-            # attendance already marked for this student on this date
-            print("Attendance already marked for student ", self.id, " on ", current_date_time.split()[0])
-        else:
-            # attendance not yet marked, insert values to table
+        if not attendance_data:
             query = "INSERT INTO student_attendance (student_number, date, time) VALUES (%s, %s, %s)"
             values = (self.id, current_date_time.split()[0], current_date_time.split()[1])
             cursor.execute(query, values)
