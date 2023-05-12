@@ -10,7 +10,7 @@ except Exception as e:
 
 db = get_database()
 cursor = db.cursor()
-query = "SELECT user_id FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
+query = "SELECT user_id FROM `active_user_ip` WHERE user_type='instructor' AND is_active=1;"
 cursor.execute(query, )
 
 
@@ -48,7 +48,7 @@ def event_post():
 
     db = get_database()
     cursor = db.cursor()
-    query = "SELECT user_id FROM `active_user_ip` WHERE user_type='student' AND is_active=0;"
+    query = "SELECT user_id FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
     cursor.execute(query)
 
     # Use fetchall() to get all the rows returned by the query
