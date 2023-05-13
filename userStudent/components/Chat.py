@@ -14,15 +14,20 @@ from utils.db_connection import get_database
 
 
 class ChatScreen:
-    def __init__(self, parent_frame, id):
+    def __init__(self, parent_frame, id, full_name):
         super().__init__()
 
         self.parent_frame = parent_frame
         self.id = id
+        self.full_name = full_name
 
         # self.HOST = 'localhost'
         self.PORT = 9995
-        
+
+        # host = self.HOST
+
+
+       
         self.receive_thread = None
         self.receive_messages_flag = False
         
@@ -56,9 +61,8 @@ class ChatScreen:
         """
         cursor.execute(query)
         result = cursor.fetchall()
-        self.instructor_ip_dict = {
-            f"{row[0]}, {row[1]}": row[2] for row in result
-        }
+        self.instructor_ip_dict = {f"{row[0]}, {row[1]}".strip(): row[2] for row in result}
+
 
         self.options = ["-- Select instructor Server --"] + \
             list(self.instructor_ip_dict.keys())
@@ -142,7 +146,9 @@ class ChatScreen:
 
     def set_host_from_instructor_name(self, selected_option):
         if selected_option != "-- Select instructor Server --":
-            self.HOST = self.instructor_ip_dict[selected_option].strip()
+            print('selected_option: ',selected_option)
+            
+            self.HOST = self.new_instructor_ip_dict[selected_option].strip()
             if self.receive_thread and self.receive_thread.is_alive():
                 # Thread is already running, just update the HOST
                 self.receive_messages_stop = False
@@ -171,6 +177,8 @@ class ChatScreen:
 
     def messages(self, event=None):
         msg = self.message_entry.get()
+        msg_to_send = f'<<<::{self.full_name}::>>>{msg}'
+        
 
         if msg != '':
             self.textbox.configure(state="normal")
@@ -180,21 +188,19 @@ class ChatScreen:
             self.textbox.tag_config('white', foreground='white')
             self.textbox.configure(state="disabled")
 
-            # send_thread = threading.Thread(
-            #     target=self.send_messages, args=(self.clients, msg))
-            # send_thread.daemon = True
-            # send_thread.start()
+            self.client_socket.send(msg_to_send.encode('utf-8'))
+            if msg == "quit":
+                self.receive_messages_stop = True  # Stop receiving messages
 
             self.message_entry.delete(0, "end")
 
-    def receive_messages(self):
-        host = self.HOST
 
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((self.HOST, self.PORT))
+    def receive_messages(self):
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.connect((self.HOST, self.PORT))
 
         while not self.receive_messages_stop:
-            msg = client_socket.recv(1024).decode('utf-8')
+            msg = self.client_socket.recv(1024).decode('utf-8')
 
             if not msg:
                 break
@@ -205,20 +211,6 @@ class ChatScreen:
             self.textbox.tag_config('white', foreground='white')
             self.textbox.configure(state="disabled")
 
-        client_socket.close()
+        self.client_socket.close()
+        
 
-    def send_messages(self, event=None):
-        msg = self.text_input.get("1.0", "end-1c")
-        if msg.strip():
-            self.text_input.delete("1.0", "end")
-            self.textbox.configure(state="normal")
-            self.textbox.insert("end", "You: ", 'yellow')
-            self.textbox.insert("end", f"{msg}\n", 'white')
-            self.textbox.tag_config('yellow', foreground='yellow')
-            self.textbox.tag_config('white', foreground='white')
-            self.textbox.configure(state="disabled")
-
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.connect((self.HOST, self.PORT))
-            client_socket.sendall(msg.encode('utf-8'))
-            client_socket.close()

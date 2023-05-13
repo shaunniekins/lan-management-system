@@ -94,7 +94,7 @@ class ChatScreen:
             self.clients.append(conn)
 
             t = threading.Thread(target=self.client_handler,
-                                 args=(conn, addr, self.clients))
+                                 args=(conn, addr, self.clients, self.textbox))
             t.daemon = True
             t.start()
 
@@ -119,16 +119,32 @@ class ChatScreen:
             self.message_entry.delete(0, "end")
 
     @staticmethod
-    def client_handler(conn, addr, clients):
+    def client_handler(conn, addr, clients, textbox):
         while True:
             try:
                 msg = conn.recv(1024).decode('utf-8')
 
                 if not msg:
                     break
+                else:
+                    # print("message:", msg)  # Print received message
+                    if msg != '':
+                        textbox.configure(state="normal")
+                        if '<<<::' in msg and '::>>>' in msg:
+                            name_start = msg.index('<<<::') + 5
+                            name_end = msg.index('::>>>')
+                            name = msg[name_start:name_end]
+                            content_start = name_end + 5
+                            content = msg[content_start:]
+                            textbox.insert("end", f"{name}: ", 'yellow')
+                            textbox.insert("end", f"{content}\n", 'white')
+                        else:
+                            textbox.insert("end", "Student: ", 'yellow')
+                            textbox.insert("end", f"{msg}\n", 'white')
+                        textbox.tag_config('yellow', foreground='yellow')
+                        textbox.tag_config('white', foreground='white')
+                        textbox.configure(state="disabled")
 
-                if msg == 'quit':
-                    break
 
                 for client in clients.copy():
                     if client != conn:
@@ -145,22 +161,24 @@ class ChatScreen:
                 print(f"Error receiving message from client {addr}: {e}")
                 break
 
-        conn.close()
-        if conn in clients:
-            clients.remove(conn)
-        print("Client disconnected:", addr)
+        if conn is not None:
+            conn.close()
+            if conn in clients:
+                clients.remove(conn)
+            print("Client disconnected:", addr)
+
 
     def send_messages(self, clients, msg):
         for client in clients.copy():
             try:
-                client.send(msg.encode())
+                client.send(msg.encode('utf-8'))
             except:
                 clients.remove(client)
                 print("Client disconnected")
 
         # Start a new thread to handle the updated clients list
         update_thread = threading.Thread(
-            target=self.client_handler, args=(None, None, clients))
+            target=self.client_handler, args=(None, None, clients, self.textbox))
         update_thread.daemon = True
         update_thread.start()
 
@@ -212,23 +230,3 @@ class ChatScreen:
             #     target=self.send_messages, args=(self.clients, file_contents_str))
             # send_thread.daemon = True
             # send_thread.start()
-
-    def receive_messages(self):
-        host = self.HOST
-
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect((self.HOST, self.PORT))
-
-        while not self.receive_messages_stop:
-            msg = client_socket.recv(1024).decode('utf-8')
-
-            if not msg:
-                break
-            self.textbox.configure(state="normal")
-            self.textbox.insert("end", "Instructor: ", 'yellow')
-            self.textbox.insert("end", f"{msg}\n", 'white')
-            self.textbox.tag_config('yellow', foreground='yellow')
-            self.textbox.tag_config('white', foreground='white')
-            self.textbox.configure(state="disabled")
-
-        client_socket.close()
