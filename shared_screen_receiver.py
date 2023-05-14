@@ -16,6 +16,7 @@ def start_receiver(ip_address, port):
         else:
             break
 
+# Start the receiver immediately
 hostname = socket.gethostname()
 ip_address = socket.gethostbyname(hostname)
 start_receiver(ip_address, 9996)

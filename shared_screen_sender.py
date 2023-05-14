@@ -32,8 +32,7 @@ def create_sender(ip_address, port):
     if (ip_address, port) not in senders:
         sender = ScreenShareClient(ip_address, port)
         senders.append((ip_address, port))
-        thread = threading.Thread(target=sender.start_stream)
-        thread.start()
+        sender.start_stream()  # Move the start_stream here
 
 
 def check_active_user_ip():
@@ -61,26 +60,6 @@ def check_active_user_ip():
 # Start the initial check
 check_active_user_ip_thread = threading.Thread(target=check_active_user_ip)
 check_active_user_ip_thread.start()
-
-while input("") != 'STOP':
-    # check if any sender has disconnected
-    for sender in senders:
-        if not sender[0].is_connected():
-            senders.remove(sender)
-
-    # check if any new server is available
-    cursor.execute(query, )
-    result = cursor.fetchall()
-    updated_ip_addresses = {r[0] for r in result}
-
-    new_ip_addresses = updated_ip_addresses - connected_addresses
-    for ip_address in new_ip_addresses:
-        for port in ports:
-            if is_server_available(ip_address, port):
-                connected_addresses.add(ip_address)
-                create_sender(ip_address, port)
-
-    time.sleep(1)  # wait 1 second before checking again
 
 # Stop the periodic check
 check_active_user_ip_thread.join()

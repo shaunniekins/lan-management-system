@@ -5,8 +5,11 @@ import customtkinter
 import socket
 from vidstream import StreamingServer
 import threading
-# from remote_control import remote
+from remote_control import remote
 import subprocess
+import time
+import datetime
+import os
 
 
 from utils.db_connection import get_database
@@ -23,17 +26,14 @@ class ChatScreen:
         self.user_type = user_type
         self.ip_address = ip_address
 
-        # self.HOST = 'localhost'
+
+        self.HOST = None
         self.PORT = 9995
-       
         self.receive_thread = None
         self.receive_messages_flag = False
-        
         self.instructor_ip_dict = {}
 
-
         self.parent_frame = parent_frame
-
         self.chat_frame = customtkinter.CTkFrame(self.parent_frame)
         self.chat_frame.pack(fill="both", expand=True)
 
@@ -47,6 +47,8 @@ class ChatScreen:
         self.content_container = customtkinter.CTkFrame(
             self.chat_container, corner_radius=0)
         self.content_container.pack(fill="both", expand=True)
+        
+        self.set_host_and_execute_remote_main()
 
         db = get_database()
         cursor = db.cursor()
@@ -111,7 +113,13 @@ class ChatScreen:
         # else:
         #     self.message_entry.configure(state="normal")
             
-            
+    def set_host_and_execute_remote_main(self):
+        if self.HOST is not None:
+            host = f'http://{self.HOST}:5000'
+            key = str(self.id)
+
+            time.sleep(15)  # Wait for 15 seconds   
+            self.execute_remote_main(host, key)
             
     def check_for_new_data(self):
         # print("check for update.............")
@@ -144,9 +152,9 @@ class ChatScreen:
 
     def set_host_from_instructor_name(self, selected_option):
         if selected_option != "-- Select instructor Server --":
-            print('selected_option: ',selected_option)
-            
+            print('selected_option: ', selected_option)
             self.HOST = self.new_instructor_ip_dict[selected_option].strip()
+
             if self.receive_thread and self.receive_thread.is_alive():
                 # Thread is already running, just update the HOST
                 self.receive_messages_stop = False
@@ -161,6 +169,8 @@ class ChatScreen:
                 self.receive_thread.start()
                 print('host: ', self.HOST)
 
+            self.set_host_and_execute_remote_main()
+
             connection_ip_address = self.HOST
             check_user_ip_address_student(self.id, self.user_type, self.ip_address, connection_ip_address, 1)
             print("self.id: ", self.id)
@@ -168,11 +178,7 @@ class ChatScreen:
             print("self.ip_address ",self.ip_address)
             print("self.HOST: ", self.HOST)
             
-
-            host = (f'{self.HOST}:5000')
-            key = self.id
-
-            # remote.main(host, key)
+            
         else:
             if self.receive_thread and self.receive_thread.is_alive():
                 # Stop the thread and clear the textbox
@@ -180,6 +186,9 @@ class ChatScreen:
                 self.textbox.configure(state="normal")
                 self.textbox.delete('1.0', 'end')
                 self.textbox.configure(state="disabled")
+
+    def execute_remote_main(self, host, key):
+        remote.main(host, key)
 
     def messages(self, event=None):
         msg = self.message_entry.get()
@@ -204,11 +213,33 @@ class ChatScreen:
     def receive_messages(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((self.HOST, self.PORT))
+        
+        LAN_FILES_DIR = os.path.expanduser("~/Documents/LAN_Files")
+        if not os.path.exists(LAN_FILES_DIR):
+            os.makedirs(LAN_FILES_DIR)
 
         while not self.receive_messages_stop:
             msg = self.client_socket.recv(1024).decode('utf-8')
 
             if not msg:
+                if msg.startswith("<FILE>"):
+                    filename_start = msg.find("<FILE>") + len("<FILE>")
+                    filename_end = msg.find("<FILE>", filename_start)
+                    filename = msg[filename_start:filename_end]
+
+                    current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                    new_filename = f"{current_time}_{os.path.basename(filename)}"
+                    file_contents = b""
+                    while True:
+                        data = self.client_socket.recv(1024)
+                        if not data:
+                            break
+                        file_contents += data
+                        if data.endswith(b""):
+                            break
+                    file_path = os.path.join(LAN_FILES_DIR, new_filename)
+                    with open(file_path, "wb") as f:
+                        f.write(file_contents)
                 break
             self.textbox.configure(state="normal")
             self.textbox.insert("end", "Instructor: ", 'yellow')
@@ -218,5 +249,3 @@ class ChatScreen:
             self.textbox.configure(state="disabled")
 
         self.client_socket.close()
-        
-

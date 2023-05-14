@@ -5,6 +5,8 @@ import tkinter as tk
 import socket
 import subprocess
 import webbrowser
+import time
+
 
 class RemoteAccessFrame:
     def __init__(self, parent_frame, id):
@@ -21,10 +23,13 @@ class RemoteAccessFrame:
 
         hostname = socket.gethostname()
         self.connection_ip_address = socket.gethostbyname(hostname)
-        self.ip_address = f'{socket.gethostbyname(hostname)}:5000'
+        self.ip_address = f'{socket.gethostbyname(hostname)}:5000/'
 
         self.frames = []
         self.websites = []
+        
+        subprocess.Popen(['python', 'remote_control/app.py'])
+        
         
         db = get_database()
         cursor = db.cursor()
@@ -33,7 +38,7 @@ class RemoteAccessFrame:
         cursor.execute(query, values)
         result = cursor.fetchall()
 
-        keys = list(set(row[0] for row in result))
+        keys = list(set(str(row[0]) for row in result))
         print("key: ", keys)
         num_subprocesses = len(keys)
 
@@ -41,6 +46,16 @@ class RemoteAccessFrame:
         for i in range(num_subprocesses):
             subprocess.Popen(['python', 'remote_control/app.py'])
             self.websites.append(f'http://{self.ip_address}?key={keys[i]}')
+
+
+        # for i in range(num_subprocesses):
+        #     subprocess.Popen(['python', 'remote_control/app.py'])
+            
+        #     self.websites = [f'http://{self.ip_address}?key={key}' for key in keys]
+        #     for website in self.websites:
+        #         webbrowser.open(website)
+        #         time.sleep(1)  # Add a delay of 1 second between opening websites
+
 
         
         self.timer_interval = 1000  
@@ -122,8 +137,8 @@ class RemoteAccessFrame:
         self.go_back_button.destroy()
         
     def on_close(self):
-        subprocess.Popen(["pkill", "-9", "-f", "app.py"])
-        # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
+        # subprocess.Popen(["pkill", "-9", "-f", "app.py"])
+        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
 
     def shutdown(self):
         """Shutdown the remote access"""
@@ -136,15 +151,20 @@ class RemoteAccessFrame:
         cursor.execute(query, values)
         result = cursor.fetchall()
 
-        keys = list(set(row[0] for row in result))
+        keys = list(set(str(row[0]) for row in result))
         print("key: ", keys)
         num_subprocesses = len(keys)
+
 
 
         # Check if there is a change in the data
         if num_subprocesses != len(self.websites):
             # Clear the current websites and update with the new data
+            # self.websites = [f'http://{self.ip_address}?key={key}' for key in keys]
+            # webbrowser.open(f'http://{self.ip_address}?key={key}' for key in keys)
             self.websites = [f'http://{self.ip_address}?key={key}' for key in keys]
+            # for website in self.websites:
+            #     webbrowser.open(website)
 
             # Refresh the frames with the updated websites
             self.refresh_frames(num_subprocesses)

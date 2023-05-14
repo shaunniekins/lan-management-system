@@ -190,17 +190,17 @@ class ChatScreen:
 
         # client_socket, client_address = self.server.accept()
         
-        # filename = tkinter.filedialog.askopenfilename()
-        # if filename:
-        #     with open(filename, 'rb') as f:
-        #         file_contents = f.read()
-        #     file_contents_str = f"{FILE_MARKER}{filename}{FILE_MARKER}{file_contents}"
-        #     self.textbox.configure(state="normal")
-        #     filename_only = os.path.basename(filename)
-        #     print("file_contents_str", file_contents_str)
-        #     self.textbox.insert("end", f"[You sent {filename_only}]\n", 'cyan')
-        #     self.textbox.tag_config('cyan', foreground='cyan')
-        #     self.textbox.configure(state="disabled")
+        filename = tkinter.filedialog.askopenfilename()
+        if filename:
+            with open(filename, 'rb') as f:
+                file_contents = f.read()
+            file_contents_str = f"{FILE_MARKER}{filename}{FILE_MARKER}{file_contents}"
+            self.textbox.configure(state="normal")
+            filename_only = os.path.basename(filename)
+            print("file_contents_str", file_contents_str)
+            self.textbox.insert("end", f"[You sent {filename_only}]\n", 'cyan')
+            self.textbox.tag_config('cyan', foreground='cyan')
+            self.textbox.configure(state="disabled")
 
         filename = tkinter.filedialog.askopenfilename()
         if filename:

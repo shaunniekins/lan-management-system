@@ -383,7 +383,10 @@ mysql-connector-python
 fpdf
 vidstream
 opencv-python
+pycv2
 tkinterweb
 customtkinter
 flask
 Pillow
+pywin32
+requests
