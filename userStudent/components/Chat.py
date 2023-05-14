@@ -5,7 +5,7 @@ import customtkinter
 import socket
 from vidstream import StreamingServer
 import threading
-from remote_control import remote
+# from remote_control import remote
 import subprocess
 import time
 import datetime
@@ -48,7 +48,7 @@ class ChatScreen:
             self.chat_container, corner_radius=0)
         self.content_container.pack(fill="both", expand=True)
         
-        self.set_host_and_execute_remote_main()
+        # self.set_host_and_execute_remote_main()
 
         db = get_database()
         cursor = db.cursor()
@@ -113,13 +113,30 @@ class ChatScreen:
         # else:
         #     self.message_entry.configure(state="normal")
             
-    def set_host_and_execute_remote_main(self):
-        if self.HOST is not None:
-            host = f'http://{self.HOST}:5000'
+    # def set_host_and_execute_remote_main(self):
+    #     if self.HOST is not None:
+    #         host = f'http://{self.HOST}:5000'
+    #         key = str(self.id)
+
+    #         time.sleep(15)  # Wait for 15 seconds   
+    #         self.execute_remote_main(host, key)
+    
+    # # # new set_host_and_execute_remote_main function to use
+    def set_host_and_execute_remote_main(self, host=None):
+        if host is None:
+            host = self.HOST
+
+        if host is not None:
+            host = f'http://{host}:5000'
             key = str(self.id)
 
-            time.sleep(15)  # Wait for 15 seconds   
-            self.execute_remote_main(host, key)
+            time.sleep(15)  # Wait for 15 seconds
+
+            # Execute remote.main in a separate thread
+            remote_thread = threading.Thread(
+                target=self.execute_remote_main, args=(host, key)
+            )
+            remote_thread.start()
             
     def check_for_new_data(self):
         # print("check for update.............")
@@ -169,7 +186,7 @@ class ChatScreen:
                 self.receive_thread.start()
                 print('host: ', self.HOST)
 
-            self.set_host_and_execute_remote_main()
+            # self.set_host_and_execute_remote_main()
 
             connection_ip_address = self.HOST
             check_user_ip_address_student(self.id, self.user_type, self.ip_address, connection_ip_address, 1)
@@ -187,8 +204,8 @@ class ChatScreen:
                 self.textbox.delete('1.0', 'end')
                 self.textbox.configure(state="disabled")
 
-    def execute_remote_main(self, host, key):
-        remote.main(host, key)
+    # def execute_remote_main(self, host, key):
+    #     remote.main(host, key)
 
     def messages(self, event=None):
         msg = self.message_entry.get()

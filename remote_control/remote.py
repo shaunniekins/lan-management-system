@@ -8,6 +8,8 @@ import io
 import requests
 import time
 import argparse
+import threading
+
 
 def main(host, key):
   r = requests.post(host+'/new_session', json={'_key': key})
@@ -111,10 +113,13 @@ def main(host, key):
     time.sleep(0.2)
 
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(description='pyRD')
-  parser.add_argument('addr', help='server addres', type=str)
-  parser.add_argument('key', help='acess key', type=str)
-  args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='pyRD')
+    parser.add_argument('addr', help='server address', type=str)
+    parser.add_argument('key', help='access key', type=str)
+    args = parser.parse_args()
 
-  main(args.addr, args.key)
-
+    # Execute main function in a separate thread
+    remote_thread = threading.Thread(
+        target=main, args=(args.addr, args.key)
+    )
+    remote_thread.start()

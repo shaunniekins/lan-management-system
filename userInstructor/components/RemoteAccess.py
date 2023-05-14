@@ -33,7 +33,7 @@ class RemoteAccessFrame:
         
         db = get_database()
         cursor = db.cursor()
-        query = "SELECT user_id FROM active_user_ip WHERE user_type = 'student' AND is_active = 1 AND connection_ip_address = %s;"
+        query = "SELECT DISTINCT user_id FROM active_user_ip WHERE user_type = 'student' AND is_active = 1 AND connection_ip_address = %s;"
         values = (self.connection_ip_address,)
         cursor.execute(query, values)
         result = cursor.fetchall()
@@ -137,8 +137,8 @@ class RemoteAccessFrame:
         self.go_back_button.destroy()
         
     def on_close(self):
-        # subprocess.Popen(["pkill", "-9", "-f", "app.py"])
-        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
+        subprocess.Popen(["pkill", "-9", "-f", "app.py"])
+        # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
 
     def shutdown(self):
         """Shutdown the remote access"""
@@ -146,7 +146,7 @@ class RemoteAccessFrame:
     def update_query(self):
         db = get_database()
         cursor = db.cursor()
-        query = "SELECT user_id FROM active_user_ip WHERE user_type = 'student' AND is_active = 1 AND connection_ip_address = %s;"
+        query = "SELECT DISTINCT user_id FROM active_user_ip WHERE user_type = 'student' AND is_active = 1 AND connection_ip_address = %s;"
         values = (self.connection_ip_address,)
         cursor.execute(query, values)
         result = cursor.fetchall()
@@ -207,8 +207,8 @@ class RemoteAccessFrame:
                 self.popup_menu = tk.Menu(self.buttonMenu, tearoff=0)
                 self.popup_menu.add_command(
                     label="View", command=lambda website=website: self.view_website(website))
-                self.popup_menu.add_command(
-                    label="Shutdown", command=self.shutdown)
+                # self.popup_menu.add_command(
+                #     label="Shutdown", command=self.shutdown)
 
                 # bind the popup menu to the button
                 def popup(event, popup_menu=self.popup_menu):
