@@ -4,7 +4,9 @@ from tkinter import messagebox
 import socket
 
 import customtkinter
-from utils.register_user_ip_address import check_user_ip_address, close_lan_active
+from utils.register_user_ip_address import check_user_ip_address_student
+from utils.register_user_ip_address import close_lan_active_student
+
 
 from userStudent.components.AddSubject import AddSubjectFrame
 from userStudent.components.Chat import ChatScreen
@@ -34,11 +36,12 @@ class StudentDashboard(customtkinter.CTk):
         self.last_name = last_name
         self.appearance_mode = appearance_mode
         self.user_type = user_type
+        self.full_name = f'{self.last_name}, {self.first_name}'
 
         hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
+        self.ip_address = socket.gethostbyname(hostname)
 
-        check_user_ip_address(self.id, self.user_type, ip_address, 1)
+        check_user_ip_address_student(self.id, self.user_type, self.ip_address, '', 1)
 
         self.geometry(f"{1200}x{650}")
         self.title("LAN Connect - Student Dashboard")
@@ -122,7 +125,7 @@ class StudentDashboard(customtkinter.CTk):
 
         # frames
         self.add_subject_frame = AddSubjectFrame(self.main_frame, self.id)
-        self.chat_frame = ChatScreen(self.main_frame, self.id)
+        self.chat_frame = ChatScreen(self.main_frame, self.id, self.full_name, self.user_type, self.ip_address)
 
         self.sidebar_button_event(self.sidebar_add_subject)
 
@@ -135,7 +138,10 @@ class StudentDashboard(customtkinter.CTk):
 
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            close_lan_active(self.id, 0)
+            # close_lan_active(self.id, 0)
+            close_lan_active_student(self.id, 0, ' ')
+            
+            
             self.on_close()
             self.destroy()
             
@@ -166,7 +172,9 @@ class StudentDashboard(customtkinter.CTk):
     def logout_event(self):
         from login import App
 
-        close_lan_active(self.id, 0)
+        # close_lan_active(self.id, 0)
+        close_lan_active_student(self.id, 0, ' ')
+        
 
         login_window = App()
         subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
@@ -208,9 +216,11 @@ class StudentDashboard(customtkinter.CTk):
         query = "SELECT * FROM student_attendance WHERE student_number = %s AND date = %s"
         values = (self.id, current_date_time.split()[0])
         cursor.execute(query, values)
+        # cursor.execute(query, values)
+        result = cursor.fetchone()  # Fetch the result even if you don't use it
         attendance_data = cursor.fetchone()
 
-        if not attendance_data:
+        if not result:
             query = "INSERT INTO student_attendance (student_number, date, time) VALUES (%s, %s, %s)"
             values = (self.id, current_date_time.split()[0], current_date_time.split()[1])
             cursor.execute(query, values)

@@ -4,6 +4,7 @@ import tkinterweb
 import tkinter as tk
 import socket
 import subprocess
+import webbrowser
 
 class RemoteAccessFrame:
     def __init__(self, parent_frame, id):
@@ -18,28 +19,37 @@ class RemoteAccessFrame:
             self.remote_access_frame)
         self.container_remote.pack(fill='both', expand=True)
 
-        subprocess.Popen(['python', 'remote_control/app.py'])
+        hostname = socket.gethostname()
+        self.connection_ip_address = socket.gethostbyname(hostname)
+        self.ip_address = f'{socket.gethostbyname(hostname)}:5000'
 
         self.frames = []
-        
-        hostname = socket.gethostname()
-        ip_address = f'{socket.gethostbyname(hostname)}:5000'
+        self.websites = []
         
         db = get_database()
         cursor = db.cursor()
-        query = "SELECT COUNT(user_id) FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
-        cursor.execute(query, )
-        result = cursor.fetchone()[0]
+        query = "SELECT user_id FROM active_user_ip WHERE user_type = 'student' AND is_active = 1 AND connection_ip_address = %s;"
+        values = (self.connection_ip_address,)
+        cursor.execute(query, values)
+        result = cursor.fetchall()
 
-        # Generate the list of websites with the appropriate number of "google.com" entries
-        self.websites = [ip_address for _ in range(int(result))]
-        print("website: ", self.websites[0])
+        keys = list(set(row[0] for row in result))
+        print("key: ", keys)
+        num_subprocesses = len(keys)
+
+
+        for i in range(num_subprocesses):
+            subprocess.Popen(['python', 'remote_control/app.py'])
+            self.websites.append(f'http://{self.ip_address}?key={keys[i]}')
+
         
+        self.timer_interval = 1000  
+        self.update_query()
 
         # Set the number of frames per row
         frames_per_row = 3
         frame_count = 0
-        if result:
+        if num_subprocesses:
             for website in self.websites:
                 # create a new row if we've reached the maximum number of frames per row
                 if frame_count % frames_per_row == 0:
@@ -117,4 +127,79 @@ class RemoteAccessFrame:
 
     def shutdown(self):
         """Shutdown the remote access"""
-        # add code to shutdown the remote access
+        
+    def update_query(self):
+        db = get_database()
+        cursor = db.cursor()
+        query = "SELECT user_id FROM active_user_ip WHERE user_type = 'student' AND is_active = 1 AND connection_ip_address = %s;"
+        values = (self.connection_ip_address,)
+        cursor.execute(query, values)
+        result = cursor.fetchall()
+
+        keys = list(set(row[0] for row in result))
+        print("key: ", keys)
+        num_subprocesses = len(keys)
+
+
+        # Check if there is a change in the data
+        if num_subprocesses != len(self.websites):
+            # Clear the current websites and update with the new data
+            self.websites = [f'http://{self.ip_address}?key={key}' for key in keys]
+
+            # Refresh the frames with the updated websites
+            self.refresh_frames(num_subprocesses)
+
+        # Schedule the next update after 1 second
+        self.container_remote.after(1000, self.update_query)
+
+        
+    def refresh_frames(self, num_subprocesses):
+        print('Updated')
+        # Clear the current frames
+        for frame in self.frames:
+            frame.destroy()
+        self.frames = []
+
+        frames_per_row = 3
+        frame_count = 0
+
+        if num_subprocesses:
+            for website in self.websites:
+                # create a new row if we've reached the maximum number of frames per row
+                if frame_count % frames_per_row == 0:
+                    row = len(self.frames) // frames_per_row
+                    self.container_remote.grid_rowconfigure(row, weight=1)
+
+                # create a new frame and add it to the current row
+                self.frame = tkinterweb.HtmlFrame(
+                    self.container_remote, width=5, height=5)
+                self.frame.load_website(website)
+                self.frame.grid(row=len(self.frames) // frames_per_row,
+                                column=frame_count % frames_per_row, pady=10, padx=10, sticky="nsew")
+                self.frames.append(self.frame)
+
+                # create a new button and place it in the frame
+                self.buttonMenu = customtkinter.CTkButton(
+                    self.frame, text="⋮", font=("Arial", 30, 'bold'), width=2)
+                self.buttonMenu.place(relx=1.0, x=-10, y=10, anchor="ne")
+
+                # create a popup menu and add options
+                self.popup_menu = tk.Menu(self.buttonMenu, tearoff=0)
+                self.popup_menu.add_command(
+                    label="View", command=lambda website=website: self.view_website(website))
+                self.popup_menu.add_command(
+                    label="Shutdown", command=self.shutdown)
+
+                # bind the popup menu to the button
+                def popup(event, popup_menu=self.popup_menu):
+                    popup_menu.post(event.x_root, event.y_root)
+
+                self.buttonMenu.bind("<Button-1>", popup)
+
+                self.popup_menu.posted = False
+
+                frame_count += 1
+
+        # configure the columns to be evenly sized
+        for i in range(frames_per_row):
+            self.container_remote.grid_columnconfigure(i, weight=1)

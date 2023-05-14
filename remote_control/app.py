@@ -1,18 +1,10 @@
 import io
 from flask import Flask, Response, request, jsonify, render_template
-from utils.db_connection import get_database
 
 try:
   from werkzeug.wsgi import FileWrapper
 except Exception as e:
   from werkzeug import FileWrapper
-
-
-db = get_database()
-cursor = db.cursor()
-query = "SELECT user_id FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
-cursor.execute(query, )
-
 
 
 global STATE
@@ -44,36 +36,13 @@ def rd():
 
 @app.route('/event_post', methods=['POST'])
 def event_post():
-    global STATE
+  global STATE
 
-    db = get_database()
-    cursor = db.cursor()
-    query = "SELECT user_id FROM `active_user_ip` WHERE user_type='student' AND is_active=1;"
-    cursor.execute(query)
+  req = request.get_json()
+  key = req['_key']
 
-    # Use fetchall() to get all the rows returned by the query
-    rows = cursor.fetchall()
-
-    # Convert the rows into a list of user_ids
-    user_ids = [row[0] for row in rows]
-    
-    print("user_ids", user_ids)
-
-    # Assign the user_ids as the keys in the STATE dictionary
-    for user_id in user_ids:
-        STATE[user_id] = {
-            'im': b'',
-            'filename': '',
-            'events': []
-        }
-
-    req = request.get_json()
-    key = req['_key']
-
-    STATE[key]['events'].append(request.get_json())
-    return jsonify({'ok': True})
-
-
+  STATE[key]['events'].append(request.get_json())
+  return jsonify({'ok': True})
 
 ''' Remote '''
 

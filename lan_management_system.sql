@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 10, 2023 at 12:09 PM
+-- Generation Time: May 14, 2023 at 04:50 AM
 -- Server version: 8.0.33
 -- PHP Version: 8.2.5
 
@@ -32,18 +32,22 @@ CREATE TABLE `active_user_ip` (
   `user_id` int NOT NULL,
   `ip_address` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `user_type` varchar(15) NOT NULL,
-  `is_active` tinyint NOT NULL DEFAULT '0'
+  `is_active` tinyint NOT NULL DEFAULT '0',
+  `connection_ip_address` varchar(15) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `active_user_ip`
 --
 
-INSERT INTO `active_user_ip` (`id`, `user_id`, `ip_address`, `user_type`, `is_active`) VALUES
-(4, 1, '192.168.1.31', 'admin', 0),
-(5, 14, '192.168.0.115', 'instructor', 0),
-(6, 8, '192.168.1.12', 'student', 0),
-(7, 9, '192.168.1.105', 'student', 0);
+INSERT INTO `active_user_ip` (`id`, `user_id`, `ip_address`, `user_type`, `is_active`, `connection_ip_address`) VALUES
+(4, 1, '192.168.137.1', 'admin', 0, NULL),
+(5, 14, '192.168.1.12', 'instructor', 0, NULL),
+(6, 8, '192.168.1.12', 'student', 0, ' '),
+(7, 9, '111', 'student', 0, ' '),
+(8, 7, '192.168.1.12', 'instructor', 1, NULL),
+(9, 10, '192.168.0.115', 'student', 0, NULL),
+(10, 8, '192.168.1.12', 'student', 0, ' ');
 
 -- --------------------------------------------------------
 
@@ -138,7 +142,8 @@ CREATE TABLE `registered_student_id` (
 
 INSERT INTO `registered_student_id` (`id`, `student_id`) VALUES
 (14, '122'),
-(13, '1315961111');
+(13, '1315961111'),
+(15, '999');
 
 -- --------------------------------------------------------
 
@@ -182,7 +187,14 @@ CREATE TABLE `student_attendance` (
 --
 
 INSERT INTO `student_attendance` (`id`, `student_number`, `date`, `time`) VALUES
-(1, 8, '2023-05-09', '08:42:11');
+(1, 8, '2023-05-09', '08:42:11'),
+(2, 8, '2023-05-01', '23:32:37'),
+(3, 8, '2023-05-10', '23:33:41'),
+(4, 8, '2023-05-11', '03:14:38'),
+(5, 8, '2023-05-12', '02:32:43'),
+(6, 10, '2023-05-12', '06:10:19'),
+(7, 8, '2023-05-13', '13:35:36'),
+(8, 8, '2023-05-14', '02:39:38');
 
 -- --------------------------------------------------------
 
@@ -249,7 +261,8 @@ CREATE TABLE `user_student` (
 
 INSERT INTO `user_student` (`id`, `id_number`, `username`, `first_name`, `middle_name`, `last_name`, `year_level`, `password`) VALUES
 (8, '1315961111', 'edward', 'Edward', 'Duffel', 'Smith', '2', '123'),
-(9, '122', 'kent', 'Clark', 'dfd', 'Kent', '2', '123');
+(9, '122', 'kent', 'Clark', 'dfd', 'Kent', '2', '123'),
+(10, '999', 'robin', 'Robin', 'H', 'Hood', '8', '123');
 
 --
 -- Indexes for dumped tables
@@ -343,7 +356,7 @@ ALTER TABLE `user_student`
 -- AUTO_INCREMENT for table `active_user_ip`
 --
 ALTER TABLE `active_user_ip`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `avail_academic_year`
@@ -373,7 +386,7 @@ ALTER TABLE `enrolled_subject`
 -- AUTO_INCREMENT for table `registered_student_id`
 --
 ALTER TABLE `registered_student_id`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `registered_subject`
@@ -385,7 +398,7 @@ ALTER TABLE `registered_subject`
 -- AUTO_INCREMENT for table `student_attendance`
 --
 ALTER TABLE `student_attendance`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `user_admin`
@@ -403,7 +416,7 @@ ALTER TABLE `user_instructor`
 -- AUTO_INCREMENT for table `user_student`
 --
 ALTER TABLE `user_student`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables

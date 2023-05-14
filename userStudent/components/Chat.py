@@ -9,24 +9,22 @@ import threading
 import subprocess
 
 
-
 from utils.db_connection import get_database
+from utils.register_user_ip_address import check_user_ip_address_student
 
 
 class ChatScreen:
-    def __init__(self, parent_frame, id, full_name):
+    def __init__(self, parent_frame, id, full_name, user_type, ip_address):
         super().__init__()
 
         self.parent_frame = parent_frame
         self.id = id
         self.full_name = full_name
+        self.user_type = user_type
+        self.ip_address = ip_address
 
         # self.HOST = 'localhost'
         self.PORT = 9995
-
-        # host = self.HOST
-
-
        
         self.receive_thread = None
         self.receive_messages_flag = False
@@ -162,6 +160,14 @@ class ChatScreen:
                 self.receive_thread.daemon = True
                 self.receive_thread.start()
                 print('host: ', self.HOST)
+
+            connection_ip_address = self.HOST
+            check_user_ip_address_student(self.id, self.user_type, self.ip_address, connection_ip_address, 1)
+            print("self.id: ", self.id)
+            print("self.user_type: ", self.user_type)
+            print("self.ip_address ",self.ip_address)
+            print("self.HOST: ", self.HOST)
+            
 
             host = (f'{self.HOST}:5000')
             key = self.id
