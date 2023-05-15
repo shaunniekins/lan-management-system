@@ -12,6 +12,9 @@ class RemoteAccessFrame:
     def __init__(self, parent_frame, id):
         self.parent_frame = parent_frame
         self.id = id
+
+        # subprocess.Popen(["pkill", "-9", "-f", "app.py"])
+        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
         
         self.remote_access_frame = customtkinter.CTkScrollableFrame(
             self.parent_frame)
@@ -28,7 +31,7 @@ class RemoteAccessFrame:
         self.frames = []
         self.websites = []
         
-        subprocess.Popen(['python', 'remote_control/app.py'])
+        # subprocess.Popen(['python', 'remote_control/app.py'])
         
         
         db = get_database()
@@ -137,8 +140,8 @@ class RemoteAccessFrame:
         self.go_back_button.destroy()
         
     def on_close(self):
-        subprocess.Popen(["pkill", "-9", "-f", "app.py"])
-        # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
+        # subprocess.Popen(["pkill", "-9", "-f", "app.py"])
+        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq app.py"', shell=True)
 
     def shutdown(self):
         """Shutdown the remote access"""

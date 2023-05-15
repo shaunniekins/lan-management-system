@@ -79,7 +79,7 @@ class AdminDashboard(customtkinter.CTk):
 
         self.logo_label = customtkinter.CTkLabel(
             master=self.sidebar_container,
-            text="Student\nDashboard",
+            text="Admin\nDashboard",
             font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.pack(side="top", pady=(30, 30))
 
