@@ -133,6 +133,8 @@ class ViewSubjectFrame:
         db.close()
 
     def on_close(self):
+        # WIN_LIN
+        
         # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_sender.py"])
         subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_sender.py"', shell=True)
         

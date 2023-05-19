@@ -1,4 +1,5 @@
-from vidstream import StreamingServer
+# from vidstream import StreamingServer
+from vidstream_mod.vidstream import StreamingServer
 import threading
 import socket
 

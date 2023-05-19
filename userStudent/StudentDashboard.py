@@ -146,6 +146,8 @@ class StudentDashboard(customtkinter.CTk):
             self.destroy()
             
     def on_close(self):
+        # WIN_LIN
+        
         # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
         subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
         
@@ -168,6 +170,7 @@ class StudentDashboard(customtkinter.CTk):
             
             # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
             self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            
             self.sidebar_view_shared_screen.configure(fg_color="red", text="Stop View Screen") # Change button text to "Stop Share Screen"
         
 

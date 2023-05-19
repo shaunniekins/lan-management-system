@@ -1,5 +1,6 @@
 import threading
-from vidstream import ScreenShareClient
+# from vidstream import ScreenShareClient
+from vidstream_mod.vidstream import ScreenShareClient
 import socket
 import time
 from utils.db_connection import get_database

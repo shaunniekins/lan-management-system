@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 14, 2023 at 04:50 AM
+-- Generation Time: May 19, 2023 at 06:23 AM
 -- Server version: 8.0.33
 -- PHP Version: 8.2.5
 
@@ -41,13 +41,11 @@ CREATE TABLE `active_user_ip` (
 --
 
 INSERT INTO `active_user_ip` (`id`, `user_id`, `ip_address`, `user_type`, `is_active`, `connection_ip_address`) VALUES
-(4, 1, '192.168.137.1', 'admin', 0, NULL),
+(4, 1, '192.168.1.12', 'admin', 0, NULL),
 (5, 14, '192.168.1.12', 'instructor', 0, NULL),
 (6, 8, '192.168.1.12', 'student', 0, ' '),
-(7, 9, '111', 'student', 0, ' '),
 (8, 7, '192.168.1.12', 'instructor', 1, NULL),
-(9, 10, '192.168.0.115', 'student', 0, NULL),
-(10, 8, '192.168.1.12', 'student', 0, ' ');
+(9, 10, '192.168.1.12', 'student', 0, ' ');
 
 -- --------------------------------------------------------
 
@@ -128,6 +126,27 @@ INSERT INTO `enrolled_subject` (`id`, `subject`, `student`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `instructor_log`
+--
+
+CREATE TABLE `instructor_log` (
+  `id` int NOT NULL,
+  `instructor_id` int NOT NULL,
+  `date` date NOT NULL,
+  `time` time NOT NULL,
+  `hostname` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `instructor_log`
+--
+
+INSERT INTO `instructor_log` (`id`, `instructor_id`, `date`, `time`, `hostname`) VALUES
+(1, 14, '2023-05-19', '13:40:00', 'fedora');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `registered_student_id`
 --
 
@@ -141,6 +160,9 @@ CREATE TABLE `registered_student_id` (
 --
 
 INSERT INTO `registered_student_id` (`id`, `student_id`) VALUES
+(16, '11'),
+(17, '111'),
+(18, '1123'),
 (14, '122'),
 (13, '1315961111'),
 (15, '999');
@@ -187,14 +209,9 @@ CREATE TABLE `student_attendance` (
 --
 
 INSERT INTO `student_attendance` (`id`, `student_number`, `date`, `time`) VALUES
-(1, 8, '2023-05-09', '08:42:11'),
-(2, 8, '2023-05-01', '23:32:37'),
-(3, 8, '2023-05-10', '23:33:41'),
-(4, 8, '2023-05-11', '03:14:38'),
-(5, 8, '2023-05-12', '02:32:43'),
 (6, 10, '2023-05-12', '06:10:19'),
-(7, 8, '2023-05-13', '13:35:36'),
-(8, 8, '2023-05-14', '02:39:38');
+(12, 10, '2023-05-19', '08:48:05'),
+(13, 8, '2023-05-19', '09:39:46');
 
 -- --------------------------------------------------------
 
@@ -305,6 +322,13 @@ ALTER TABLE `enrolled_subject`
   ADD KEY `subject` (`subject`);
 
 --
+-- Indexes for table `instructor_log`
+--
+ALTER TABLE `instructor_log`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `instructor_id` (`instructor_id`);
+
+--
 -- Indexes for table `registered_student_id`
 --
 ALTER TABLE `registered_student_id`
@@ -383,10 +407,16 @@ ALTER TABLE `enrolled_subject`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `instructor_log`
+--
+ALTER TABLE `instructor_log`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `registered_student_id`
 --
 ALTER TABLE `registered_student_id`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `registered_subject`
@@ -398,7 +428,7 @@ ALTER TABLE `registered_subject`
 -- AUTO_INCREMENT for table `student_attendance`
 --
 ALTER TABLE `student_attendance`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `user_admin`
@@ -428,6 +458,12 @@ ALTER TABLE `user_student`
 ALTER TABLE `enrolled_subject`
   ADD CONSTRAINT `enrolled_subject_ibfk_1` FOREIGN KEY (`student`) REFERENCES `user_student` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `enrolled_subject_ibfk_2` FOREIGN KEY (`subject`) REFERENCES `registered_subject` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+
+--
+-- Constraints for table `instructor_log`
+--
+ALTER TABLE `instructor_log`
+  ADD CONSTRAINT `instructor_log_ibfk_1` FOREIGN KEY (`instructor_id`) REFERENCES `user_instructor` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `registered_subject`
