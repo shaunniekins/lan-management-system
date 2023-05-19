@@ -89,7 +89,7 @@ class AttendanceFrame:
 
         # create the table
         # self.subjectColumn = ('Name','Date', 'Time', 'Subject', 'Course')
-        self.subjectColumn = ('Name', 'Time')
+        self.subjectColumn = ('Name', 'Section', 'Time')
 
         self.attendanceTable = ttk.Treeview(self.attendance_right_container,
                                          columns=self.subjectColumn,
@@ -98,14 +98,14 @@ class AttendanceFrame:
                                          show='headings')
 
         self.attendanceTable.column("#1", anchor="c", width=30)
-        self.attendanceTable.column("#2", anchor="c", width=5)
-        # self.attendanceTable.column("#3", anchor="c", width=35)
+        self.attendanceTable.column("#2", anchor="c", width=10)
+        self.attendanceTable.column("#3", anchor="c", width=5)
         # self.attendanceTable.column("#3", anchor="c", width=30)
         # self.attendanceTable.column("#5", anchor="c", width=30)
         
 
         self.attendanceTable.heading('Name', text='Name')
-        # self.attendanceTable.heading('Date', text='Date')
+        self.attendanceTable.heading('Section', text='Section')
         self.attendanceTable.heading('Time', text='Time')
         # self.attendanceTable.heading('Subject', text='Subject')
         # self.attendanceTable.heading('Course', text='Course')
@@ -155,7 +155,7 @@ class AttendanceFrame:
             valuesCourseDisplay = (self.id, self.subjectToShow)
             
             query = (
-                "SELECT CONCAT(user_student.last_name,', ', user_student.first_name) as name, "
+                "SELECT CONCAT(user_student.last_name,', ', user_student.first_name) as name, registered_subject.section, "
                 "TIME_FORMAT(student_attendance.time, '%H:%i') as time "
                 "FROM student_attendance "
                 "JOIN enrolled_subject ON student_attendance.student_number = enrolled_subject.student "

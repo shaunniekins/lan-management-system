@@ -2,6 +2,7 @@ import tkinter
 from tkinter import ttk
 from tkinter import messagebox
 import socket
+import datetime
 
 import customtkinter
 from utils.register_user_ip_address import check_user_ip_address, close_lan_active
@@ -11,6 +12,8 @@ from userInstructor.components.RemoteAccess import RemoteAccessFrame
 from userInstructor.components.ViewSubject import ViewSubjectFrame
 from userInstructor.components.Chat import ChatScreen
 from userInstructor.components.Attendance import AttendanceFrame
+
+from utils.db_connection import get_database
 
 
 class InstructorDashboard(customtkinter.CTk):
@@ -25,9 +28,11 @@ class InstructorDashboard(customtkinter.CTk):
         self.appearance_mode = appearance_mode
         self.user_type = user_type
         self.full_name = f'{self.last_name}, {self.first_name}'
+        
+        self.mark_attendance()
 
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
+        self.hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(self.hostname)
 
         check_user_ip_address(self.id, self.user_type, ip_address, 1)
 
@@ -140,7 +145,7 @@ class InstructorDashboard(customtkinter.CTk):
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             close_lan_active(self.id, 0)
-            self.remote_access_frame.on_close()
+            # self.remote_access_frame.on_close()
             self.view_subject_frame.on_close()
             self.destroy()
 
@@ -167,7 +172,7 @@ class InstructorDashboard(customtkinter.CTk):
         from login import App
 
         close_lan_active(self.id, 0)
-        self.remote_access_frame.on_close()
+        # self.remote_access_frame.on_close()
         self.view_subject_frame.on_close()
         login_window = App()
         self.destroy()
@@ -225,3 +230,25 @@ class InstructorDashboard(customtkinter.CTk):
             self.chat_frame.chat_frame.pack_forget()
             self.remote_access_frame.remote_access_frame.pack_forget()
             self.attendance_frame.attendance_frame.pack(fill='both', expand=True)
+
+    def mark_attendance(self):
+        # get current date and time
+        current_date_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        hostname = socket.gethostname()
+
+        # check if attendance has already been marked for this student on this date
+        db = get_database()
+        cursor = db.cursor()
+        query = "SELECT * FROM instructor_log WHERE instructor_id = %s AND date = %s"
+        values = (self.id, current_date_time.split()[0])
+        cursor.execute(query, values)
+        # cursor.execute(query, values)
+        result = cursor.fetchone()  # Fetch the result even if you don't use it
+        attendance_data = cursor.fetchone()
+
+        if not result:
+            query = "INSERT INTO instructor_log (instructor_id, date, time, hostname) VALUES (%s, %s, %s, %s)"
+            values = (self.id, current_date_time.split()[0], current_date_time.split()[1], hostname)
+            cursor.execute(query, values)
+            db.commit()
+            db.close()

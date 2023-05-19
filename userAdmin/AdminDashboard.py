@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import socket
 import time
+import os
 
 import customtkinter
 from utils.register_user_ip_address import check_user_ip_address, close_lan_active
@@ -14,6 +15,10 @@ from userAdmin.components.RemoteAccess import RemoteAccessFrame
 
 
 from utils.db_connection import get_database
+from fpdf import FPDF
+from datetime import datetime, date
+
+
 
 
 class AdminDashboard(customtkinter.CTk):
@@ -136,7 +141,11 @@ class AdminDashboard(customtkinter.CTk):
         
         self.sidebar_register_id = customtkinter.CTkButton(
             master=self.sidebar_container, text="Register ID", command=self.register_id_event,)
-        self.sidebar_register_id.pack(pady=10)  
+        self.sidebar_register_id.pack(pady=10)
+        
+        self.instructor_log = customtkinter.CTkButton(
+            master=self.sidebar_container, text="Instructor Log", command=self.instructor_log_event,)
+        self.instructor_log.pack(pady=10)
 
         # self.sidebar_view_lab_server = customtkinter.CTkButton(
         #     master=self.sidebar_container, text="View Lab Servers", command=lambda: self.sidebar_button_event(self.sidebar_view_lab_server))
@@ -231,7 +240,76 @@ class AdminDashboard(customtkinter.CTk):
     def on_window_close(self, window):
         self.sidebar_register_id.configure(state='normal')
         window.destroy()
-            
+        
+    def instructor_log_event(self):
+        self.column = ('Name', 'Subject', 'Date', 'Time', 'Hostname')
+
+        self.attendanceTable = ttk.Treeview(
+                                        self.sidebar_container,
+                                        columns=self.column,
+                                        height=17,
+                                        selectmode='browse',
+                                        show='headings')
+
+        self.attendanceTable.column("#1", anchor="c", width=30)
+        self.attendanceTable.column("#2", anchor="c", width=10)
+        self.attendanceTable.column("#3", anchor="c", width=5)        
+
+        self.attendanceTable.heading('Name', text='Name')
+        self.attendanceTable.heading('Subject', text='Subject')
+        self.attendanceTable.heading('Date', text='Date')
+        self.attendanceTable.heading('Time', text='Time')
+        self.attendanceTable.heading('Hostname', text='Hostname')
+        
+        db = get_database()
+        cursor = db.cursor()
+        query = (
+            "SELECT "
+                "CONCAT(user_instructor.first_name, ' ', user_instructor.last_name) AS name, "
+                "registered_subject.subject_description, "
+                "instructor_log.date, "
+                "instructor_log.time, "
+                "instructor_log.hostname "
+            "FROM "
+                "user_instructor "
+                "INNER JOIN instructor_log ON user_instructor.id = instructor_log.instructor_id "
+                "INNER JOIN registered_subject ON instructor_log.instructor_id = registered_subject.instructor "
+        )
+        cursor.execute(query )
+        resultSection = cursor.fetchall()
+        
+        pdf = FPDF("P", "mm", "A4")
+        pdf.add_page()
+        pdf.set_font('Times', 'B', 12)
+        pdf.cell(0, 10, 'Instructor in Attendance', ln=True, align='C')
+        available_width = pdf.w - 2 * pdf.l_margin
+        column_width = available_width / len(self.column)
+
+        for column in self.column:
+            pdf.cell(column_width, 10, column, border=1, align='C')
+
+        pdf.ln()
+
+        pdf.set_font('Times', '', 12)  # Set font to regular
+        for row in resultSection:
+            for value in row:
+                pdf.cell(column_width, 10, str(value), border=1, align='C')
+            pdf.ln()
+
+        LAN_FILES_DIR = os.path.expanduser("~/Documents/LAN_Files")
+        if not os.path.exists(LAN_FILES_DIR):
+            os.makedirs(LAN_FILES_DIR)
+
+        # create file name with current date and time
+        now = datetime.now()
+        date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+        file_name = os.path.join(LAN_FILES_DIR, f"[admin-file]:instructor_log{date_time}.pdf")
+
+        # save PDF file
+        pdf.output(file_name)
+        messagebox.showinfo("PDF Saved", f"Attendance PDF saved as:\n{file_name}")
+
+
     def check_for_new_data(self):
         db = get_database()
         cursor = db.cursor()        
