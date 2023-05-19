@@ -19,7 +19,7 @@ class ChatScreen:
 
         hostname = socket.gethostname()
         self.HOST = socket.gethostbyname(hostname)
-        self.PORT = 9995
+        self.PORT = self.find_available_port()
 
         self.parent_frame = parent_frame
 
@@ -87,6 +87,17 @@ class ChatScreen:
             target=self.accept_connections)
         self.receive_thread.daemon = True
         self.receive_thread.start()
+        
+    def find_available_port(self):
+        for port in range(9995, 10000):
+            try:
+                test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                test_socket.bind((self.HOST, port))
+                test_socket.close()
+                return port
+            except OSError:
+                continue
+
 
     def accept_connections(self):
         while True:

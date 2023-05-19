@@ -17,8 +17,8 @@ class AttendanceFrame:
         self.parent_frame = parent_frame
         self.id = id
         self.name = full_name
-        self.subjectToShow = ''
-        self.year_lvl = ''
+        self.subjectToShow = ' '
+        self.year_lvl = ' '
         
         self.attendance_frame = customtkinter.CTkScrollableFrame(
             self.parent_frame)
@@ -175,8 +175,12 @@ class AttendanceFrame:
         cursorCourseDisplay.execute(queryCourseDisplay, valuesCourseDisplay)
         # Fetch the result from the cursor
         result = cursorCourseDisplay.fetchone()
-        course_description = result[0]
-        year_level = result[1]
+        if result is not None:
+            course_description = result[0]
+            year_level = result[1]
+        else:
+            course_description = ''
+            year_level = ''
         
         self.year_lvl = year_level
         self.course_label.configure(text=f"Course: {course_description}")
