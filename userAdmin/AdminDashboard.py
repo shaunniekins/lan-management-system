@@ -128,11 +128,15 @@ class AdminDashboard(customtkinter.CTk):
 
         self.sidebar_register_instructor = customtkinter.CTkButton(
             master=self.sidebar_container, text="Create Account", command=lambda: self.sidebar_button_event(self.sidebar_register_instructor), state="disabled")
-        self.sidebar_register_instructor.pack(pady=(0, 10))
+        self.sidebar_register_instructor.pack(pady=(0, 10)) 
 
         self.sidebar_add_items = customtkinter.CTkButton(
             master=self.sidebar_container, text="Add Items", command=lambda: self.sidebar_button_event(self.sidebar_add_items))
         self.sidebar_add_items.pack(pady=10)
+        
+        self.sidebar_register_id = customtkinter.CTkButton(
+            master=self.sidebar_container, text="Register ID", command=self.register_id_event,)
+        self.sidebar_register_id.pack(pady=10)  
 
         # self.sidebar_view_lab_server = customtkinter.CTkButton(
         #     master=self.sidebar_container, text="View Lab Servers", command=lambda: self.sidebar_button_event(self.sidebar_view_lab_server))
@@ -213,6 +217,20 @@ class AdminDashboard(customtkinter.CTk):
         
         self.timer_interval = 5000  # 5 seconds
         self.check_for_new_data()
+        
+    def register_id_event(self):
+        from userInstructor.components.RegisterStudentID import RegisterStudentID
+
+        self.sidebar_register_id.configure(state='disabled')
+
+        window = RegisterStudentID(self.sidebar_register_id)
+        window.protocol("WM_DELETE_WINDOW",
+                        lambda: self.on_window_close(window))
+        window.mainloop()
+        
+    def on_window_close(self, window):
+        self.sidebar_register_id.configure(state='normal')
+        window.destroy()
             
     def check_for_new_data(self):
         db = get_database()

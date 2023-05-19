@@ -24,6 +24,7 @@ class InstructorDashboard(customtkinter.CTk):
         self.last_name = last_name
         self.appearance_mode = appearance_mode
         self.user_type = user_type
+        self.full_name = f'{self.last_name}, {self.first_name}'
 
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
@@ -92,9 +93,9 @@ class InstructorDashboard(customtkinter.CTk):
             master=self.sidebar_container, text="Remote Access", command=lambda: self.sidebar_button_event(self.sidebar_remote_access))
         self.sidebar_remote_access.pack(pady=10)
 
-        self.sidebar_register_id = customtkinter.CTkButton(
-            master=self.sidebar_container, text="Register ID", command=self.register_id_event,)
-        self.sidebar_register_id.pack(pady=10)
+        # self.sidebar_register_id = customtkinter.CTkButton(
+        #     master=self.sidebar_container, text="Register ID", command=self.register_id_event,)
+        # self.sidebar_register_id.pack(pady=10)
         
         self.sidebar_attendance = customtkinter.CTkButton(
             master=self.sidebar_container, text="Attendance", command=lambda: self.sidebar_button_event(self.sidebar_attendance))
@@ -127,7 +128,7 @@ class InstructorDashboard(customtkinter.CTk):
         self.view_subject_frame = ViewSubjectFrame(self.main_frame, self.id)
         self.remote_access_frame = RemoteAccessFrame(self.main_frame, self.id)
         self.chat_frame = ChatScreen(self.main_frame)
-        self.attendance_frame = AttendanceFrame(self.main_frame, self.id)
+        self.attendance_frame = AttendanceFrame(self.main_frame, self.id, self.full_name,)
 
         self.sidebar_button_event(self.sidebar_register)
 
@@ -143,24 +144,24 @@ class InstructorDashboard(customtkinter.CTk):
             self.view_subject_frame.on_close()
             self.destroy()
 
-    def register_id_event(self):
-        from userInstructor.components.RegisterStudentID import RegisterStudentID
+    # def register_id_event(self):
+    #     from userInstructor.components.RegisterStudentID import RegisterStudentID
 
-        self.sidebar_register_id.configure(state='disabled')
+    #     self.sidebar_register_id.configure(state='disabled')
 
-        window = RegisterStudentID(self.sidebar_register_id)
-        window.grab_set()
-        # window.withdraw()
-        window.protocol("WM_DELETE_WINDOW",
-                        lambda: self.on_window_close(window))
-        window.mainloop()
+    #     window = RegisterStudentID(self.sidebar_register_id)
+    #     window.grab_set()
+    #     # window.withdraw()
+    #     window.protocol("WM_DELETE_WINDOW",
+    #                     lambda: self.on_window_close(window))
+    #     window.mainloop()
 
-    def on_window_close(self, window):
-        window.grab_release()
-        # window.deiconify()
-        # Enable the button when the window is closed
-        self.sidebar_register_id.configure(state='normal')
-        window.destroy()
+    # def on_window_close(self, window):
+    #     window.grab_release()
+    #     # window.deiconify()
+    #     # Enable the button when the window is closed
+    #     self.sidebar_register_id.configure(state='normal')
+    #     window.destroy()
 
     def logout_event(self):
         from login import App
