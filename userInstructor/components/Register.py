@@ -162,8 +162,9 @@ class RegisterFrame:
         db = get_database()
         cursor = db.cursor()
 
-        query = "SELECT subject_description, year_level, section, course_description, academic_school_year, academic_semester FROM registered_subject ORDER BY year_level ASC, subject_description DESC;"
-        cursor.execute(query)
+        query = "SELECT subject_description, year_level, section, course_description, academic_school_year, academic_semester FROM registered_subject WHERE instructor=%s ORDER BY year_level ASC, subject_description DESC"
+        values = (self.id, )
+        cursor.execute(query, values)
 
         for row in cursor:
             self.subjectTable.insert('', 'end', values=row)
@@ -214,8 +215,9 @@ class RegisterFrame:
 
                 db = get_database()
                 cursor = db.cursor()
-                query = "SELECT subject_description, year_level, section, course_description, academic_school_year, academic_semester FROM registered_subject"
-                cursor.execute(query)
+                query = "SELECT subject_description, year_level, section, course_description, academic_school_year, academic_semester FROM registered_subject WHERE instructor=%s ORDER BY year_level ASC, subject_description DESC;"
+                values = (self.id, )
+                cursor.execute(query, values)
                 for row in cursor:
                     self.subjectTable.insert('', 'end', values=row)
                 cursor.close()
