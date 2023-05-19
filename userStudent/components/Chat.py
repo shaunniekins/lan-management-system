@@ -258,11 +258,23 @@ class ChatScreen:
                     with open(file_path, "wb") as f:
                         f.write(file_contents)
                 break
-            self.textbox.configure(state="normal")
-            self.textbox.insert("end", "Instructor: ", 'yellow')
-            self.textbox.insert("end", f"{msg}\n", 'white')
-            self.textbox.tag_config('yellow', foreground='yellow')
-            self.textbox.tag_config('white', foreground='white')
-            self.textbox.configure(state="disabled")
+            else:
+                if msg != '':
+                    self.textbox.configure(state="normal")
+                    if '<<<::' in msg and '::>>>' in msg:
+                        name_start = msg.index('<<<::') + 5
+                        name_end = msg.index('::>>>')
+                        name = msg[name_start:name_end]
+                        content_start = name_end + 5
+                        content = msg[content_start:]
+                        self.textbox.insert("end", f"{name}: ", 'yellow')
+                        self.textbox.insert("end", f"{content}\n", 'white')
+                    else:
+                        self.textbox.insert("end", "Instructor: ", 'violet')
+                        self.textbox.insert("end", f"{msg}\n", 'white')
+                    self.textbox.tag_config('violet', foreground='violet')
+                    self.textbox.tag_config('yellow', foreground='yellow')
+                    self.textbox.tag_config('white', foreground='white')
+                    self.textbox.configure(state="disabled")
 
         self.client_socket.close()

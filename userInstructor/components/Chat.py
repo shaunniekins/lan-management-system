@@ -138,9 +138,6 @@ class ChatScreen:
                             content = msg[content_start:]
                             textbox.insert("end", f"{name}: ", 'yellow')
                             textbox.insert("end", f"{content}\n", 'white')
-                        else:
-                            textbox.insert("end", "Student: ", 'yellow')
-                            textbox.insert("end", f"{msg}\n", 'white')
                         textbox.tag_config('yellow', foreground='yellow')
                         textbox.tag_config('white', foreground='white')
                         textbox.configure(state="disabled")
