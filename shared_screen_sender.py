@@ -1,9 +1,12 @@
-import threading
-# from vidstream import ScreenShareClient
-from vidstream_mod.vidstream import ScreenShareClient
-import socket
+from socket import socket, gethostbyname, gethostname
+from threading import Thread
+from zlib import compress
 import time
 from utils.db_connection import get_database
+import tkinter as tk
+
+
+from mss import mss
 
 db = get_database()
 cursor = db.cursor()
@@ -13,62 +16,66 @@ cursor.execute(query, )
 result = cursor.fetchall()
 
 ip_addresses = [r[0] for r in result]
-ports = [9999, 9998, 9997, 9996, 9995]
+ports = [9997]
 senders = []
 threads = []
 connected_addresses = set()
 
 
-def is_server_available(ip_address, port):
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            s.connect((ip_address, port))
-        return True
-    except (socket.timeout, ConnectionRefusedError):
-        return False
+
+root = tk.Tk()
+WIDTH = root.winfo_screenwidth()
+HEIGHT = root.winfo_screenheight()
+root.destroy()
+
+# WIDTH = 1900
+# HEIGHT = 1000
 
 
-def create_sender(ip_address, port):
-    if (ip_address, port) not in senders:
-        sender = ScreenShareClient(ip_address, port)
-        senders.append((ip_address, port))
-        sender.start_stream()  # Move the start_stream here
+def retrieve_screenshot(conn):
+    with mss() as sct:
+        # The region to capture
+        rect = {'top': 0, 'left': 0, 'width': WIDTH, 'height': HEIGHT}
+
+        while 'recording':
+            # Capture the screen
+            img = sct.grab(rect)
+            # Tweak the compression level here (0-9)
+            pixels = compress(img.rgb, 6)
+
+            # Send the size of the pixels length
+            size = len(pixels)
+            size_len = (size.bit_length() + 7) // 8
+            conn.send(bytes([size_len]))
+
+            # Send the actual pixels length
+            size_bytes = size.to_bytes(size_len, 'big')
+            conn.send(size_bytes)
+
+            # Send pixels
+            conn.sendall(pixels)
 
 
-def check_active_user_ip():
-    while True:
-        cursor.execute(query, )
-        result = cursor.fetchall()
-        updated_ip_addresses = {r[0] for r in result}
+def main(ports):
+    for port in ports:
+        for ip_address in ip_addresses:
+            try:
+                sock = socket()
+                sock.bind((ip_address, port))
+                sock.listen(5)
+                print(f'Server started at {ip_address}:{port}')
 
-        # Check for new IP addresses
-        new_ip_addresses = updated_ip_addresses - connected_addresses
-        for ip_address in new_ip_addresses:
-            for port in ports:
-                if is_server_available(ip_address, port):
-                    connected_addresses.add(ip_address)
-                    create_sender(ip_address, port)
+                while 'connected':
+                    conn, addr = sock.accept()
+                    print('Client connected IP:', addr)
+                    thread = Thread(target=retrieve_screenshot, args=(conn,))
+                    thread.start()
 
-        # Check for disconnected IP addresses
-        disconnected_ip_addresses = connected_addresses - updated_ip_addresses
-        for ip_address in disconnected_ip_addresses:
-            connected_addresses.remove(ip_address)
-
-        time.sleep(5)  # Wait 5 seconds before checking for updates again
+                sock.close()
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
 
 
-# Start the initial check
-check_active_user_ip_thread = threading.Thread(target=check_active_user_ip)
-check_active_user_ip_thread.start()
-
-# Stop the periodic check
-check_active_user_ip_thread.join()
-
-for sender in senders:
-    thread = threading.Thread(target=sender[0].start_stream)
-    thread.start()
-    threads.append(thread)
-
-for thread in threads:
-    thread.join()
+if __name__ == '__main__':
+    main(ports)
