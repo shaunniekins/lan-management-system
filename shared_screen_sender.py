@@ -1,91 +1,73 @@
-from socket import socket
-from threading import Thread
-from zlib import compress
+import threading
+from vidstream import ScreenShareClient
+import socket
 import time
 from utils.db_connection import get_database
-import tkinter as tk
-from mss import mss
 
 db = get_database()
 cursor = db.cursor()
-ports = [9997]
+query = "SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student' AND is_active=1;"
+values = ()
+cursor.execute(query, )
+result = cursor.fetchall()
+
+ip_addresses = [r[0] for r in result]
+ports = [9999, 9998, 9997, 9996, 9995]
 senders = []
 threads = []
 connected_addresses = set()
 
-root = tk.Tk()
-WIDTH = root.winfo_screenwidth()
-HEIGHT = root.winfo_screenheight()
-root.destroy()
 
-# WIDTH = 1900
-# HEIGHT = 1000
+def is_server_available(ip_address, port):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1)
+            s.connect((ip_address, port))
+        return True
+    except (socket.timeout, ConnectionRefusedError):
+        return False
 
-def retrieve_screenshot(conn):
-    with mss() as sct:
-        # The region to capture
-        rect = {'top': 0, 'left': 0, 'width': WIDTH, 'height': HEIGHT}
 
-        while True:
-            try:
-                # Capture the screen
-                img = sct.grab(rect)
-                # Tweak the compression level here (0-9)
-                pixels = compress(img.rgb, 6)
+def create_sender(ip_address, port):
+    if (ip_address, port) not in senders:
+        sender = ScreenShareClient(ip_address, port)
+        senders.append((ip_address, port))
+        sender.start_stream()  # Move the start_stream here
 
-                # Send the size of the pixels length
-                size = len(pixels)
-                size_len = (size.bit_length() + 7) // 8
-                conn.send(bytes([size_len]))
 
-                # Send the actual pixels length
-                size_bytes = size.to_bytes(size_len, 'big')
-                conn.send(size_bytes)
-
-                # Send pixels
-                conn.sendall(pixels)
-            except Exception as e:
-                print(f"Error: {e}")
-                break
-
-def handle_connection(conn, addr):
-    print('Client connected IP:', addr)
-    retrieve_screenshot(conn)
-    conn.close()
-
-def check_and_connect(ip_address, port):
+def check_active_user_ip():
     while True:
-        try:
-            sock = socket()
-            sock.bind((ip_address, port))
-            sock.listen(5)
-            print(f'Server started at {ip_address}:{port}')
-
-            while True:
-                conn, addr = sock.accept()
-                thread = Thread(target=handle_connection, args=(conn, addr))
-                thread.start()
-                threads.append(thread)
-
-        except Exception as e:
-            print(f"Error: {e}")
-            continue
-
-def main(ports):
-    for port in ports:
-        query = "SELECT DISTINCT ip_address FROM active_user_ip WHERE user_type = 'student' AND is_active=1;"
-        cursor.execute(query)
+        cursor.execute(query, )
         result = cursor.fetchall()
-        ip_addresses = [r[0] for r in result]
+        updated_ip_addresses = {r[0] for r in result}
 
-        for ip_address in ip_addresses:
-            thread = Thread(target=check_and_connect, args=(ip_address, port))
-            thread.start()
-            threads.append(thread)
+        # Check for new IP addresses
+        new_ip_addresses = updated_ip_addresses - connected_addresses
+        for ip_address in new_ip_addresses:
+            for port in ports:
+                if is_server_available(ip_address, port):
+                    connected_addresses.add(ip_address)
+                    create_sender(ip_address, port)
 
-    # Wait for all threads to complete
-    for thread in threads:
-        thread.join()
+        # Check for disconnected IP addresses
+        disconnected_ip_addresses = connected_addresses - updated_ip_addresses
+        for ip_address in disconnected_ip_addresses:
+            connected_addresses.remove(ip_address)
 
-if __name__ == '__main__':
-    main(ports)
+        time.sleep(5)  # Wait 5 seconds before checking for updates again
+
+
+# Start the initial check
+check_active_user_ip_thread = threading.Thread(target=check_active_user_ip)
+check_active_user_ip_thread.start()
+
+# Stop the periodic check
+check_active_user_ip_thread.join()
+
+for sender in senders:
+    thread = threading.Thread(target=sender[0].start_stream)
+    thread.start()
+    threads.append(thread)
+
+for thread in threads:
+    thread.join()

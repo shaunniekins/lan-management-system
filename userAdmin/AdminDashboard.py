@@ -290,10 +290,11 @@ class AdminDashboard(customtkinter.CTk):
 
         pdf.ln()
 
-        pdf.set_font('Times', '', 12)  # Set font to regular
+        pdf.set_font('Times', '', 12) # Set font to regular
         for row in resultSection:
             for value in row:
-                pdf.cell(column_width, 10, str(value), border=1, align='C')
+                pdf.multi_cell(column_width, 10, str(value), border=1, align='C')
+                pdf.set_xy(pdf.get_x() + column_width, pdf.get_y() - 10)
             pdf.ln()
 
         LAN_FILES_DIR = os.path.expanduser("~/Documents/LAN_Files")
@@ -303,7 +304,7 @@ class AdminDashboard(customtkinter.CTk):
         # create file name with current date and time
         now = datetime.now()
         date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = os.path.join(LAN_FILES_DIR, f"[admin-file]:instructor_log{date_time}.pdf")
+        file_name = os.path.join(LAN_FILES_DIR, f"admin_file-instructor_log{date_time}.pdf")
 
         # save PDF file
         pdf.output(file_name)

@@ -157,28 +157,28 @@ class StudentDashboard(customtkinter.CTk):
         # subprocess.Popen(["pkill", "-9", "-f", "remote.py"])
         subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq remote.py"', shell=True)
 
-    # def view_shared_screen_event(self):
-    #     if self.receiver_process is not None:
-    #         subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
-    #         # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
-            
-    #         self.receiver_process = None
-    #         self.sidebar_view_shared_screen.configure(fg_color="green", text="View Screen") # Change button text to "Share Screen"
-    #     else:
-    #         subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
-    #         # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
-            
-    #         self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
-    #         # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
-            
-    #         self.sidebar_view_shared_screen.configure(fg_color="red", text="Stop View Screen") # Change button text to "Stop Share Screen"
-   
     def view_shared_screen_event(self):
-        # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
-        subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
+        if self.receiver_process is not None:
+            # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+            subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
+            
+            self.receiver_process = None
+            self.sidebar_view_shared_screen.configure(fg_color="green", text="View Screen") # Change button text to "Share Screen"
+        else:
+            # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+            subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
+            
+            # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
+            self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            
+            self.sidebar_view_shared_screen.configure(fg_color="red", text="Stop View Screen") # Change button text to "Stop Share Screen"
+   
+    # def view_shared_screen_event(self):
+    #     subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
+    #     # subprocess.call('taskkill /F /IM python.exe /T /FI "WINDOWTITLE eq shared_screen_receiver.py"', shell=True)
         
-        # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
-        self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+    #     self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, preexec_fn=os.setpgrp) # Start the sender_process in a new process group
+    #     # self.receiver_process = subprocess.Popen("python shared_screen_receiver.py", shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
   
   
     def on_window_close(self, window):

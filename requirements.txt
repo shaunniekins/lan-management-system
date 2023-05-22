@@ -390,3 +390,6 @@ Pillow
 pywin32
 requests
 opencv-python
+tkinterweb
+pygame
+mss
