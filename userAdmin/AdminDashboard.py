@@ -253,7 +253,10 @@ class AdminDashboard(customtkinter.CTk):
 
         self.attendanceTable.column("#1", anchor="c", width=30)
         self.attendanceTable.column("#2", anchor="c", width=10)
-        self.attendanceTable.column("#3", anchor="c", width=5)        
+        self.attendanceTable.column("#3", anchor="c", width=5)
+        self.attendanceTable.column("#4", anchor="c", width=5)        
+        self.attendanceTable.column("#5", anchor="c", width=5)        
+                
 
         self.attendanceTable.heading('Name', text='Name')
         self.attendanceTable.heading('Subject', text='Subject')
@@ -280,7 +283,7 @@ class AdminDashboard(customtkinter.CTk):
         
         pdf = FPDF("P", "mm", "A4")
         pdf.add_page()
-        pdf.set_font('Times', 'B', 12)
+        pdf.set_font('Times', 'B', 10)
         pdf.cell(0, 10, 'Instructor in Attendance', ln=True, align='C')
         available_width = pdf.w - 2 * pdf.l_margin
         column_width = available_width / len(self.column)
@@ -290,12 +293,13 @@ class AdminDashboard(customtkinter.CTk):
 
         pdf.ln()
 
-        pdf.set_font('Times', '', 12) # Set font to regular
+        pdf.set_font('Times', '', 8.5)  # Set font size to 9.5
+
         for row in resultSection:
             for value in row:
-                pdf.multi_cell(column_width, 10, str(value), border=1, align='C')
-                pdf.set_xy(pdf.get_x() + column_width, pdf.get_y() - 10)
+                pdf.cell(column_width, 10, str(value), border=1, align='C')
             pdf.ln()
+
 
         LAN_FILES_DIR = os.path.expanduser("~/Documents/LAN_Files")
         if not os.path.exists(LAN_FILES_DIR):
@@ -309,7 +313,6 @@ class AdminDashboard(customtkinter.CTk):
         # save PDF file
         pdf.output(file_name)
         messagebox.showinfo("PDF Saved", f"Attendance PDF saved as:\n{file_name}")
-
 
     def check_for_new_data(self):
         db = get_database()
