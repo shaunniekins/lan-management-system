@@ -24,8 +24,8 @@ def recvall(conn, length):
 
 def main(host, port):
     pygame.init()
-    # screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    # screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     
     clock = pygame.time.Clock()
     watching = True
