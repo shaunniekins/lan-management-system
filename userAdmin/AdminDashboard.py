@@ -144,7 +144,7 @@ class AdminDashboard(customtkinter.CTk):
         self.sidebar_register_id.pack(pady=10)
         
         self.instructor_log = customtkinter.CTkButton(
-            master=self.sidebar_container, text="Instructor Log", command=self.instructor_log_event,)
+            master=self.sidebar_container, text="Print Instructor Log", command=self.instructor_log_event,)
         self.instructor_log.pack(pady=10)
 
         # self.sidebar_view_lab_server = customtkinter.CTkButton(
@@ -283,8 +283,17 @@ class AdminDashboard(customtkinter.CTk):
         
         pdf = FPDF("P", "mm", "A4")
         pdf.add_page()
-        pdf.set_font('Times', 'B', 10)
-        pdf.cell(0, 10, 'Instructor in Attendance', ln=True, align='C')
+        available_fonts = FPDF().core_fonts
+        font = 'Bookman Old Style' if 'bookman' in available_fonts else 'Times'
+        pdf.set_font(font, 'B', 10)
+        pdf.image('assets/asscat_logo.jpg', x=10, y=10, w=18, h=18)
+        pdf.set_font(font, 'B', 11)
+        pdf.cell(0, 8, 'AGUSAN DEL SUR STATE COLLEGE OF AGRICULTURE AND TECHNOLOGY', ln=True, align='C')
+        pdf.cell(0, 8, 'INSTRUCTOR ATTENDANCE LOGSHEET', ln=True, align='C')
+        pdf.cell(0, 8, 'ICT CENTER', ln=True, align='C')
+        
+        pdf.ln(8)
+        
         available_width = pdf.w - 2 * pdf.l_margin
         column_width = available_width / len(self.column)
 
@@ -293,7 +302,7 @@ class AdminDashboard(customtkinter.CTk):
 
         pdf.ln()
 
-        pdf.set_font('Times', '', 8.5)  # Set font size to 9.5
+        pdf.set_font(font, '', 8.5)  # Set font size to 9.5
 
         for row in resultSection:
             for value in row:

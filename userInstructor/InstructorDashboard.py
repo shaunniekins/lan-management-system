@@ -132,7 +132,7 @@ class InstructorDashboard(customtkinter.CTk):
         self.register_frame = RegisterFrame(self.main_frame, self.id)
         self.view_subject_frame = ViewSubjectFrame(self.main_frame, self.id)
         self.remote_access_frame = RemoteAccessFrame(self.main_frame, self.id)
-        self.chat_frame = ChatScreen(self.main_frame)
+        self.chat_frame = ChatScreen(self.main_frame, self.appearance_mode)
         self.attendance_frame = AttendanceFrame(self.main_frame, self.id, self.full_name,)
 
         self.sidebar_button_event(self.sidebar_register)

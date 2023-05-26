@@ -125,7 +125,7 @@ class StudentDashboard(customtkinter.CTk):
 
         # frames
         self.add_subject_frame = AddSubjectFrame(self.main_frame, self.id)
-        self.chat_frame = ChatScreen(self.main_frame, self.id, self.full_name, self.user_type, self.ip_address)
+        self.chat_frame = ChatScreen(self.main_frame, self.id, self.full_name, self.user_type, self.ip_address, self.appearance_mode)
 
         self.sidebar_button_event(self.sidebar_add_subject)
 
@@ -146,6 +146,8 @@ class StudentDashboard(customtkinter.CTk):
             self.destroy()
             
     def on_close(self):
+        self.mark_timeout()
+        
         # WIN_LIN
         
         # subprocess.Popen(["pkill", "-9", "-f", "shared_screen_receiver.py"])
@@ -200,6 +202,7 @@ class StudentDashboard(customtkinter.CTk):
 
         # close_lan_active(self.id, 0)
         close_lan_active_student(self.id, 0, ' ')
+        # self.mark_timeout()
         
 
         login_window = App()
@@ -255,8 +258,20 @@ class StudentDashboard(customtkinter.CTk):
         attendance_data = cursor.fetchone()
 
         if not result:
-            query = "INSERT INTO student_attendance (student_number, date, time) VALUES (%s, %s, %s)"
+            query = "INSERT INTO student_attendance (student_number, date, time_in) VALUES (%s, %s, %s)"
             values = (self.id, current_date_time.split()[0], current_date_time.split()[1])
             cursor.execute(query, values)
             db.commit()
             db.close()
+            
+    def mark_timeout(self):
+        current_date_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        
+        db = get_database()
+        cursor = db.cursor()
+        query = "UPDATE student_attendance SET time_out = %s WHERE student_number = %s AND date = %s"
+        values = (current_date_time.split()[1], self.id, current_date_time.split()[0])
+        cursor.execute(query, values)
+        db.commit()
+        db.close()
