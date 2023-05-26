@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: May 19, 2023 at 06:23 AM
+-- Generation Time: May 26, 2023 at 01:10 AM
 -- Server version: 8.0.33
--- PHP Version: 8.2.5
+-- PHP Version: 8.2.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -45,7 +45,10 @@ INSERT INTO `active_user_ip` (`id`, `user_id`, `ip_address`, `user_type`, `is_ac
 (5, 14, '192.168.1.12', 'instructor', 0, NULL),
 (6, 8, '192.168.1.12', 'student', 0, ' '),
 (8, 7, '192.168.1.12', 'instructor', 1, NULL),
-(9, 10, '192.168.1.12', 'student', 0, ' ');
+(9, 10, '192.168.0.115', 'student', 0, ' '),
+(11, 15, '192.168.1.12', 'instructor', 0, NULL),
+(12, 11, '192.168.0.115', 'student', 0, ' '),
+(13, 16, '192.168.0.115', 'instructor', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -75,7 +78,7 @@ INSERT INTO `avail_academic_year` (`id`, `school_year`, `semester`) VALUES
 CREATE TABLE `avail_course` (
   `id` int NOT NULL,
   `code` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `description` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
+  `description` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -121,7 +124,8 @@ CREATE TABLE `enrolled_subject` (
 --
 
 INSERT INTO `enrolled_subject` (`id`, `subject`, `student`) VALUES
-(2, 5, 8);
+(2, 5, 8),
+(3, 6, 11);
 
 -- --------------------------------------------------------
 
@@ -142,7 +146,14 @@ CREATE TABLE `instructor_log` (
 --
 
 INSERT INTO `instructor_log` (`id`, `instructor_id`, `date`, `time`, `hostname`) VALUES
-(1, 14, '2023-05-19', '13:40:00', 'fedora');
+(1, 14, '2023-05-19', '13:40:00', 'fedora'),
+(2, 15, '2023-05-19', '19:10:31', 'fedora'),
+(3, 14, '2023-05-21', '07:40:51', 'fedora'),
+(4, 14, '2023-05-22', '02:57:15', 'fedora'),
+(5, 14, '2023-05-23', '08:22:07', 'fedora'),
+(6, 16, '2023-05-23', '08:26:29', 'fedora'),
+(7, 14, '2023-05-24', '05:24:43', 'fedora'),
+(8, 14, '2023-05-26', '06:17:34', 'fedora');
 
 -- --------------------------------------------------------
 
@@ -163,6 +174,7 @@ INSERT INTO `registered_student_id` (`id`, `student_id`) VALUES
 (16, '11'),
 (17, '111'),
 (18, '1123'),
+(19, '1212'),
 (14, '122'),
 (13, '1315961111'),
 (15, '999');
@@ -175,10 +187,10 @@ INSERT INTO `registered_student_id` (`id`, `student_id`) VALUES
 
 CREATE TABLE `registered_subject` (
   `id` int NOT NULL,
-  `subject_description` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `subject_description` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `year_level` int NOT NULL,
   `section` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `course_description` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `course_description` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `academic_school_year` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `academic_semester` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `instructor` int NOT NULL
@@ -189,7 +201,8 @@ CREATE TABLE `registered_subject` (
 --
 
 INSERT INTO `registered_subject` (`id`, `subject_description`, `year_level`, `section`, `course_description`, `academic_school_year`, `academic_semester`, `instructor`) VALUES
-(5, 'Introduction to Programming', 2, 'A1', 'Computer Science', '2022-2023', '1st Semester', 14);
+(5, 'Introduction to Programming', 2, 'A1', 'Computer Science', '2022-2023', '1st Semester', 14),
+(6, 'Introduction to Programming', 3, '99', 'Computer Science', '2022-2023', '1st Semester', 16);
 
 -- --------------------------------------------------------
 
@@ -201,17 +214,25 @@ CREATE TABLE `student_attendance` (
   `id` int NOT NULL,
   `student_number` int NOT NULL,
   `date` date NOT NULL,
-  `time` time NOT NULL
+  `time_in` time NOT NULL,
+  `time_out` time DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `student_attendance`
 --
 
-INSERT INTO `student_attendance` (`id`, `student_number`, `date`, `time`) VALUES
-(6, 10, '2023-05-12', '06:10:19'),
-(12, 10, '2023-05-19', '08:48:05'),
-(13, 8, '2023-05-19', '09:39:46');
+INSERT INTO `student_attendance` (`id`, `student_number`, `date`, `time_in`, `time_out`) VALUES
+(6, 10, '2023-05-12', '06:10:19', NULL),
+(12, 10, '2023-05-19', '08:48:05', NULL),
+(13, 8, '2023-05-19', '09:39:46', NULL),
+(14, 8, '2023-05-21', '07:40:59', NULL),
+(15, 8, '2023-05-22', '02:57:22', NULL),
+(16, 10, '2023-05-22', '04:14:04', NULL),
+(17, 8, '2023-05-23', '08:22:18', NULL),
+(18, 11, '2023-05-23', '08:24:26', NULL),
+(19, 8, '2023-05-24', '05:10:08', NULL),
+(20, 8, '2023-05-26', '08:43:56', '09:05:59');
 
 -- --------------------------------------------------------
 
@@ -253,7 +274,9 @@ CREATE TABLE `user_instructor` (
 --
 
 INSERT INTO `user_instructor` (`id`, `username`, `first_name`, `last_name`, `password`) VALUES
-(14, 'bruce', 'Bruce', 'Wayne', '123');
+(14, 'bruce', 'Bruce', 'Wayne', '123'),
+(15, 'clark', 'Clark', 'Kent', '123'),
+(16, 'rk', 'Robert', 'Kiyosaki', '123');
 
 -- --------------------------------------------------------
 
@@ -279,7 +302,8 @@ CREATE TABLE `user_student` (
 INSERT INTO `user_student` (`id`, `id_number`, `username`, `first_name`, `middle_name`, `last_name`, `year_level`, `password`) VALUES
 (8, '1315961111', 'edward', 'Edward', 'Duffel', 'Smith', '2', '123'),
 (9, '122', 'kent', 'Clark', 'dfd', 'Kent', '2', '123'),
-(10, '999', 'robin', 'Robin', 'H', 'Hood', '8', '123');
+(10, '999', 'robin', 'Robin', 'H', 'Hood', '8', '123'),
+(11, '1212', 'matt.l', 'Matt', 'L', 'Leblanc', '2', '123');
 
 --
 -- Indexes for dumped tables
@@ -380,7 +404,7 @@ ALTER TABLE `user_student`
 -- AUTO_INCREMENT for table `active_user_ip`
 --
 ALTER TABLE `active_user_ip`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `avail_academic_year`
@@ -404,31 +428,31 @@ ALTER TABLE `avail_subject`
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `instructor_log`
 --
 ALTER TABLE `instructor_log`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `registered_student_id`
 --
 ALTER TABLE `registered_student_id`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `registered_subject`
 --
 ALTER TABLE `registered_subject`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `student_attendance`
 --
 ALTER TABLE `student_attendance`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `user_admin`
@@ -440,13 +464,13 @@ ALTER TABLE `user_admin`
 -- AUTO_INCREMENT for table `user_instructor`
 --
 ALTER TABLE `user_instructor`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `user_student`
 --
 ALTER TABLE `user_student`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables
@@ -469,11 +493,10 @@ ALTER TABLE `instructor_log`
 -- Constraints for table `registered_subject`
 --
 ALTER TABLE `registered_subject`
-  ADD CONSTRAINT `registered_subject_ibfk_1` FOREIGN KEY (`course_description`) REFERENCES `avail_course` (`description`),
-  ADD CONSTRAINT `registered_subject_ibfk_2` FOREIGN KEY (`subject_description`) REFERENCES `avail_subject` (`description`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `registered_subject_ibfk_3` FOREIGN KEY (`academic_school_year`) REFERENCES `avail_academic_year` (`school_year`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `registered_subject_ibfk_4` FOREIGN KEY (`academic_semester`) REFERENCES `avail_academic_year` (`semester`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `registered_subject_ibfk_5` FOREIGN KEY (`instructor`) REFERENCES `user_instructor` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
+  ADD CONSTRAINT `registered_subject_ibfk_5` FOREIGN KEY (`instructor`) REFERENCES `user_instructor` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `registered_subject_ibfk_6` FOREIGN KEY (`course_description`) REFERENCES `avail_course` (`description`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
 --
 -- Constraints for table `student_attendance`
