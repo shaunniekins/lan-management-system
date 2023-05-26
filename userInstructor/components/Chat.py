@@ -13,7 +13,7 @@ from utils.db_connection import get_database
 
 
 class ChatScreen:
-    def __init__(self, parent_frame):
+    def __init__(self, parent_frame, appearance_mode):
 
         super().__init__()
 
@@ -22,6 +22,7 @@ class ChatScreen:
         self.PORT = self.find_available_port()
 
         self.parent_frame = parent_frame
+        self.appearance_mode = appearance_mode
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.bind((self.HOST, self.PORT))
@@ -105,7 +106,7 @@ class ChatScreen:
             self.clients.append(conn)
 
             t = threading.Thread(target=self.client_handler,
-                                 args=(conn, addr, self.clients, self.textbox))
+                                 args=(conn, addr, self.clients, self.textbox, self.appearance_mode))
             t.daemon = True
             t.start()
 
@@ -119,7 +120,12 @@ class ChatScreen:
             self.textbox.insert("end", "You: ", 'green')
             self.textbox.insert("end", f"{msg}\n", 'white')
             self.textbox.tag_config('green', foreground='green')
-            self.textbox.tag_config('white', foreground='white')
+            
+            if self.appearance_mode == 'Dark':
+                self.textbox.tag_config('white', foreground='white')
+            elif self.appearance_mode == 'Light':
+                self.textbox.tag_config('white', foreground='black')
+                
             self.textbox.configure(state="disabled")
 
             send_thread = threading.Thread(
@@ -130,7 +136,7 @@ class ChatScreen:
             self.message_entry.delete(0, "end")
 
     @staticmethod
-    def client_handler(conn, addr, clients, textbox):
+    def client_handler(conn, addr, clients, textbox, appearance_mode):
         while True:
             try:
                 msg = conn.recv(1024).decode('utf-8')
@@ -150,7 +156,12 @@ class ChatScreen:
                             textbox.insert("end", f"{name}: ", 'yellow')
                             textbox.insert("end", f"{content}\n", 'white')
                         textbox.tag_config('yellow', foreground='yellow')
-                        textbox.tag_config('white', foreground='white')
+                        
+                        if appearance_mode == 'Dark':
+                            textbox.tag_config('white', foreground='white')
+                        elif appearance_mode == 'Light':
+                            textbox.tag_config('white', foreground='black')
+                            
                         textbox.configure(state="disabled")
 
 
@@ -186,7 +197,7 @@ class ChatScreen:
 
         # Start a new thread to handle the updated clients list
         update_thread = threading.Thread(
-            target=self.client_handler, args=(None, None, clients, self.textbox))
+            target=self.client_handler, args=(None, None, clients, self.textbox, self.appearance_mode))
         update_thread.daemon = True
         update_thread.start()
 

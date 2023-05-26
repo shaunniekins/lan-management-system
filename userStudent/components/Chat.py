@@ -17,7 +17,7 @@ from utils.register_user_ip_address import check_user_ip_address_student
 
 
 class ChatScreen:
-    def __init__(self, parent_frame, id, full_name, user_type, ip_address):
+    def __init__(self, parent_frame, id, full_name, user_type, ip_address, appearance_mode):
         super().__init__()
 
         self.parent_frame = parent_frame
@@ -25,6 +25,7 @@ class ChatScreen:
         self.full_name = full_name
         self.user_type = user_type
         self.ip_address = ip_address
+        self.appearance_mode = appearance_mode
 
 
         self.HOST = None
@@ -176,7 +177,6 @@ class ChatScreen:
                 # Thread is already running, just update the HOST
                 self.receive_messages_stop = False
                 self.message_entry.configure(state="normal")
-                print('host: ', self.HOST)
             else:
                 # Thread is not running, start a new one
                 self.receive_messages_stop = False
@@ -190,12 +190,6 @@ class ChatScreen:
 
             connection_ip_address = self.HOST
             check_user_ip_address_student(self.id, self.user_type, self.ip_address, connection_ip_address, 1)
-            print("self.id: ", self.id)
-            print("self.user_type: ", self.user_type)
-            print("self.ip_address ",self.ip_address)
-            print("self.HOST: ", self.HOST)
-            
-            
         else:
             if self.receive_thread and self.receive_thread.is_alive():
                 # Stop the thread and clear the textbox
@@ -217,8 +211,14 @@ class ChatScreen:
             self.textbox.insert("end", "You: ", 'green')
             self.textbox.insert("end", f"{msg}\n", 'white')
             self.textbox.tag_config('green', foreground='green')
-            self.textbox.tag_config('white', foreground='white')
+            
+            if self.appearance_mode == 'Dark':
+                self.textbox.tag_config('white', foreground='white')
+            elif self.appearance_mode == 'Light':
+                self.textbox.tag_config('white', foreground='black')
+                
             self.textbox.configure(state="disabled")
+
 
             self.client_socket.send(msg_to_send.encode('utf-8'))
             if msg == "quit":
@@ -274,7 +274,12 @@ class ChatScreen:
                         self.textbox.insert("end", f"{msg}\n", 'white')
                     self.textbox.tag_config('violet', foreground='violet')
                     self.textbox.tag_config('yellow', foreground='yellow')
-                    self.textbox.tag_config('white', foreground='white')
+                    
+                    if self.appearance_mode == 'Dark':
+                        self.textbox.tag_config('white', foreground='white')
+                    elif self.appearance_mode == 'Light':
+                        self.textbox.tag_config('white', foreground='black')
+                        
                     self.textbox.configure(state="disabled")
 
         self.client_socket.close()
