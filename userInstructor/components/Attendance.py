@@ -60,7 +60,8 @@ class AttendanceFrame:
         db = get_database()
 
         cursorSection = db.cursor()
-        querySection = "SELECT DISTINCT(registered_subject.subject_description) FROM registered_subject JOIN user_instructor ON registered_subject.instructor = user_instructor.id WHERE user_instructor.id = %s ORDER BY subject_description;"
+        # Update the query for retrieving distinct subject descriptions
+        querySection = "SELECT DISTINCT registered_subject.subject_description FROM registered_subject JOIN user_instructor ON registered_subject.instructor = user_instructor.id WHERE user_instructor.id = %s AND registered_subject.subject_description != '' ORDER BY registered_subject.subject_description;"
         valuesSection = (self.id,)
         cursorSection.execute(querySection, valuesSection)
         resultSection = cursorSection.fetchall()
@@ -140,26 +141,29 @@ class AttendanceFrame:
 
         self.subjectToShow = self.attendance_option.get()
         if self.subjectToShow == "All sections":
+            # Update the query for retrieving attendance data for all sections
             query = (
-                "SELECT CONCAT(user_student.last_name,', ', user_student.first_name) as name, student_attendance.date, student_attendance.time_in, student_attendance.time_out"
+                "SELECT CONCAT(user_student.last_name, ', ', user_student.first_name) AS name, student_attendance.date, student_attendance.time_in, student_attendance.time_out "
                 "FROM student_attendance "
                 "JOIN enrolled_subject ON student_attendance.student_number = enrolled_subject.student "
                 "JOIN registered_subject ON enrolled_subject.subject = registered_subject.id "
                 "JOIN user_student ON enrolled_subject.student = user_student.id "
                 "JOIN user_instructor ON registered_subject.instructor = user_instructor.id "
-                "WHERE user_instructor.id = %s "
-                "ORDER BY student_attendance.date DESC, student_attendance.time_in DESC;"
+                "WHERE registered_subject.subject_description != '' AND enrolled_subject.section != '' "
+                "ORDER BY student_attendance.date DESC, student_attendance.time_in ASC;"
             )
+
             values = (self.id,)
         else:
             # student_attendance.date, registered_subject.subject_description, registered_subject.course_description
             queryCourseDisplay = (
                 "SELECT course_description, year_level, section "
                 "FROM registered_subject "
-                "WHERE instructor = %s AND subject_description = %s;"
+                "WHERE instructor = %s AND subject_description = %s "
+                "AND course_description != '' AND year_level != '' AND section != '';"
             )
             valuesCourseDisplay = (self.id, self.subjectToShow)
-            
+                        
             query = (
                 # , registered_subject.section, 
                 "SELECT CONCAT(user_student.last_name,', ', user_student.first_name) as name,"
@@ -191,7 +195,7 @@ class AttendanceFrame:
         else:
             course_description = ''
             year_level = ''
-            section = result[2]
+            section = ''
         
         self.year_lvl = year_level
         self.course_label.configure(text=f'{course_description} - {section}')

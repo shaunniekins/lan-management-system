@@ -1,3 +1,11 @@
 .git
 .env
 .__pycache__
+__pycache__/
+mss
+userAdmin/__pycache__/
+userInstructor/__pycache__/
+userInstructor/components/__pycache__/
+userStudent/__pycache__/
+userStudent/components/__pycache__/
+utils/__pycache__/
